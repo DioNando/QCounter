@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">QCounter</string>
+
+    <!-- Actions d'incrémentation -->
+    <string name="action_direct">Réponse Directe</string>
+    <string name="action_question">Question par une Question</string>
+    <string name="action_unknown">Je ne sais pas</string>
+
+    <!-- En-tête / héro -->
+    <string name="hero_volume_label">Volume Global</string>
+    <string name="hero_distribution">Répartition des réponses</string>
+    <string name="hero_empty_hint">Touchez un bouton ci-dessous pour commencer le suivi 👇</string>
+
+    <!-- Libellés courts pour la légende de la barre de répartition -->
+    <string name="legend_direct">Directe</string>
+    <string name="legend_question">Question</string>
+    <string name="legend_unknown">Esquive</string>
+
+    <!-- KPI -->
+    <string name="kpi_title">Indicateurs (temps réel)</string>
+    <string name="kpi_total">Volume Global</string>
+    <string name="kpi_tel">Taux d\'Esquive Linéaire (TEL)</string>
+    <string name="kpi_rc">Ratio de Clarté (RC)</string>
+    <string name="kpi_unknown">Taux d\'Indécision</string>
+
+    <!-- Navigation & écrans -->
+    <string name="nav_history">Historique</string>
+    <string name="history_title">Historique des interactions</string>
+    <string name="history_empty">Aucune interaction enregistrée pour l\'instant.</string>
+    <string name="action_reset">Réinitialiser</string>
+    <string name="reset_dialog_title">Réinitialiser les compteurs ?</string>
+    <string name="reset_dialog_message">Toutes les interactions enregistrées seront définitivement supprimées.</string>
+    <string name="confirm">Confirmer</string>
+    <string name="cancel">Annuler</string>
+</resources>

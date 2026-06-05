@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme for the Activity that hosts Compose. The real styling lives in
+         the Compose QCounterTheme; this only needs to be a no-action-bar parent. -->
+    <style name="Theme.QCounter" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
