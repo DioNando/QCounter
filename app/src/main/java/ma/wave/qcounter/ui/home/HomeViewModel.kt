@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.InteractionStats
+import ma.wave.qcounter.data.model.StreakStats
 import ma.wave.qcounter.data.repository.InteractionRepository
 
 /** Événement émis après un enregistrement, pour proposer l'annulation. */
@@ -25,6 +26,13 @@ class HomeViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = InteractionStats(),
+    )
+
+    /** Séries (en cours / record) exposées à l'UI. */
+    val streaks: StateFlow<StreakStats> = repository.streaks.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = StreakStats(),
     )
 
     // On ne garde que le dernier événement : un appui rapide remplace le snackbar précédent.
@@ -44,6 +52,11 @@ class HomeViewModel(
 
     fun undo(id: Long) {
         viewModelScope.launch { repository.deleteById(id) }
+    }
+
+    /** Annule la dernière interaction (bouton flottant / secousse). */
+    fun undoLast() {
+        viewModelScope.launch { repository.deleteLast() }
     }
 
     fun reset() {

@@ -3,6 +3,7 @@ package ma.wave.qcounter.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import ma.wave.qcounter.data.repository.InteractionRepository
+import ma.wave.qcounter.ui.charts.ChartsViewModel
 import ma.wave.qcounter.ui.history.HistoryViewModel
 import ma.wave.qcounter.ui.home.HomeViewModel
 
@@ -21,6 +22,9 @@ class ViewModelFactory(
 
         modelClass.isAssignableFrom(HistoryViewModel::class.java) ->
             HistoryViewModel(repository) as T
+
+        modelClass.isAssignableFrom(ChartsViewModel::class.java) ->
+            ChartsViewModel(repository) as T
 
         else -> throw IllegalArgumentException("ViewModel inconnu : ${modelClass.name}")
     }

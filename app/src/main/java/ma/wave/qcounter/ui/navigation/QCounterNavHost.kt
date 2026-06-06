@@ -13,6 +13,8 @@ import ma.wave.qcounter.data.model.AppSettings
 import ma.wave.qcounter.data.model.EmojiIntensity
 import ma.wave.qcounter.data.model.HomeChart
 import ma.wave.qcounter.ui.ViewModelFactory
+import ma.wave.qcounter.ui.charts.ChartsScreen
+import ma.wave.qcounter.ui.charts.ChartsViewModel
 import ma.wave.qcounter.ui.history.HistoryScreen
 import ma.wave.qcounter.ui.history.HistoryViewModel
 import ma.wave.qcounter.ui.home.HomeScreen
@@ -21,6 +23,7 @@ import ma.wave.qcounter.ui.home.HomeViewModel
 private object Routes {
     const val HOME = "home"
     const val HISTORY = "history"
+    const val CHARTS = "charts"
 }
 
 @Composable
@@ -53,6 +56,7 @@ fun QCounterNavHost(
             HomeScreen(
                 viewModel = vm,
                 onOpenHistory = { navController.navigate(Routes.HISTORY) },
+                onOpenCharts = { navController.navigate(Routes.CHARTS) },
                 settings = settings,
                 onSetShowEmoji = onSetShowEmoji,
                 onSetPalette = onSetPalette,
@@ -65,6 +69,13 @@ fun QCounterNavHost(
         composable(Routes.HISTORY) {
             val vm: HistoryViewModel = viewModel(factory = factory)
             HistoryScreen(
+                viewModel = vm,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.CHARTS) {
+            val vm: ChartsViewModel = viewModel(factory = factory)
+            ChartsScreen(
                 viewModel = vm,
                 onBack = { navController.popBackStack() },
             )

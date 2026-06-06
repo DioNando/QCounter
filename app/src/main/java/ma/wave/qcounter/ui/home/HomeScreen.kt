@@ -2,7 +2,10 @@ package ma.wave.qcounter.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,18 +21,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.Undo
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -38,11 +43,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -67,16 +75,21 @@ import ma.wave.qcounter.ui.components.DonutChart
 import ma.wave.qcounter.ui.components.LegendItem
 import ma.wave.qcounter.ui.components.WaffleChart
 import ma.wave.qcounter.ui.components.SettingsSheet
+import ma.wave.qcounter.ui.components.ClarityScoreCard
 import ma.wave.qcounter.ui.components.EmojiSet
+import ma.wave.qcounter.ui.components.StreakCard
 import ma.wave.qcounter.ui.components.answerTypeVisual
 import ma.wave.qcounter.ui.components.emojiSetOf
 import ma.wave.qcounter.ui.components.moodEmoji
+import ma.wave.qcounter.ui.util.ShakeToAction
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     onOpenHistory: () -> Unit,
+    onOpenCharts: () -> Unit,
     settings: AppSettings,
     onSetShowEmoji: (Boolean) -> Unit,
     onSetPalette: (Int) -> Unit,
@@ -86,33 +99,43 @@ fun HomeScreen(
     onSetEmojiIntensity: (EmojiIntensity) -> Unit,
 ) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val streaks by viewModel.streaks.collectAsStateWithLifecycle()
     var showSettings by remember { mutableStateOf(false) }
+    var discreet by rememberSaveable { mutableStateOf(false) }
 
-    val recordedTemplate = stringResource(R.string.snackbar_recorded)
-    val undoLabel = stringResource(R.string.action_undo)
-    val labels = mapOf(
-        AnswerType.DIRECT to stringResource(R.string.action_direct),
-        AnswerType.QUESTION to stringResource(R.string.action_question),
-        AnswerType.UNKNOWN to stringResource(R.string.action_unknown),
-    )
+    val haptics = LocalHapticFeedback.current
 
+    // Annulation éphémère : un bouton flottant apparaît après chaque saisie puis disparaît,
+    // et une secousse de l'appareil annule la dernière interaction (remplace le snackbar).
+    var undoVisible by remember { mutableStateOf(false) }
+    var eventToken by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            snackbarHostState.currentSnackbarData?.dismiss()
-            val result = snackbarHostState.showSnackbar(
-                message = recordedTemplate.format(labels[event.type]),
-                actionLabel = undoLabel,
-                duration = SnackbarDuration.Short,
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.undo(event.id)
-            }
-        }
+        viewModel.events.collect { eventToken++ }
+    }
+    LaunchedEffect(eventToken) {
+        if (eventToken == 0) return@LaunchedEffect
+        undoVisible = true
+        delay(4_000)
+        undoVisible = false
+    }
+
+    fun undoLast() {
+        if (stats.totalInteractions == 0) return
+        viewModel.undoLast()
+        undoVisible = false
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+    }
+
+    // Secousse → annuler la dernière interaction (inactif en mode discret).
+    ShakeToAction(enabled = !discreet) { undoLast() }
+
+    // Mode discret : on masque entièrement le contenu derrière un écran neutre.
+    if (discreet) {
+        DiscreetCover(onReveal = { discreet = false })
+        return
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -142,6 +165,13 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { discreet = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.VisibilityOff,
+                            contentDescription = stringResource(R.string.cd_discreet),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
                     IconButton(onClick = { showSettings = true }) {
                         Icon(
                             imageVector = Icons.Rounded.Tune,
@@ -158,6 +188,27 @@ fun HomeScreen(
                 onRecord = viewModel::record,
             )
         },
+        floatingActionButton = {
+            // Bouton flottant « Annuler » en bas à droite, qui s'efface après quelques secondes.
+            AnimatedVisibility(
+                visible = undoVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = { undoLast() },
+                    icon = { Icon(Icons.Rounded.Undo, contentDescription = null) },
+                    text = { Text(stringResource(R.string.action_undo)) },
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp,
+                        focusedElevation = 0.dp,
+                        hoveredElevation = 0.dp,
+                    ),
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End,
     ) { innerPadding ->
         // Zone défilable : si tout tient (waffle), rien ne défile ; sinon
         // (anneau / anneaux, petits écrans) ça défile au lieu d'écraser la tuile.
@@ -177,12 +228,27 @@ fun HomeScreen(
                 emojiIntensity = settings.emojiIntensity,
                 modifier = Modifier.padding(top = 8.dp),
             )
-            NavTile(
-                label = stringResource(R.string.tile_history),
-                icon = Icons.Rounded.History,
-                onClick = onOpenHistory,
+            if (stats.totalInteractions > 0) {
+                ClarityScoreCard(stats = stats)
+                StreakCard(streaks = streaks)
+            }
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-            )
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                NavTile(
+                    label = stringResource(R.string.tile_history),
+                    icon = Icons.Rounded.History,
+                    onClick = onOpenHistory,
+                    modifier = Modifier.weight(1f),
+                )
+                NavTile(
+                    label = stringResource(R.string.tile_charts),
+                    icon = Icons.Rounded.Insights,
+                    onClick = onOpenCharts,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             Spacer(Modifier.height(4.dp))
         }
     }
@@ -198,6 +264,47 @@ fun HomeScreen(
             onSetEmojiIntensity = onSetEmojiIntensity,
             onDismiss = { showSettings = false },
         )
+    }
+}
+
+/**
+ * Écran neutre du mode discret : masque entièrement le contenu de l'app.
+ * Un appui n'importe où réaffiche l'écran.
+ */
+@Composable
+private fun DiscreetCover(onReveal: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable { onReveal() },
+        color = MaterialTheme.colorScheme.background,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_logo),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(18.dp)),
+            )
+            Spacer(Modifier.height(20.dp))
+            Text(
+                text = stringResource(R.string.app_name),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.discreet_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -357,7 +464,7 @@ private fun MiniStat(
     }
 }
 
-/** Tuile compacte d'accès à l'historique (icône + libellé sur une ligne). */
+/** Tuile d'accès : pilule tonale plate (icône + libellé), sans ombre. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NavTile(
@@ -366,24 +473,26 @@ private fun NavTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ElevatedCard(
+    Surface(
         onClick = onClick,
-        modifier = modifier.height(56.dp),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        modifier = modifier.height(48.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(20.dp),
             )
-            Spacer(Modifier.size(10.dp))
+            Spacer(Modifier.size(8.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleSmall,

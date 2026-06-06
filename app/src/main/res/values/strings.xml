@@ -56,8 +56,51 @@
     <string name="chart_donut">Anneau</string>
     <string name="chart_rings">Activité</string>
 
+    <!-- Mode discret -->
+    <string name="cd_discreet">Mode discret</string>
+    <string name="discreet_hint">Touchez pour afficher</string>
+
+    <!-- Indice de clarté (score comportemental) -->
+    <string name="clarity_title">Indice de clarté</string>
+    <string name="clarity_very_clear">Très clair</string>
+    <string name="clarity_clear">Plutôt clair</string>
+    <string name="clarity_mixed">Mitigé</string>
+    <string name="clarity_evasive">Évasif</string>
+    <string name="clarity_very_evasive">Très évasif</string>
+    <string name="clarity_desc_very_clear">Répond presque toujours de façon directe et assumée.</string>
+    <string name="clarity_desc_clear">Tendance nette à répondre clairement.</string>
+    <string name="clarity_desc_mixed">Alterne entre réponses claires et esquives.</string>
+    <string name="clarity_desc_evasive">Esquive ou renvoie souvent les questions.</string>
+    <string name="clarity_desc_very_evasive">Évite presque systématiquement de répondre directement.</string>
+
+    <!-- Séries (streaks) -->
+    <string name="streak_title">Séries</string>
+    <string name="streak_current">En cours</string>
+    <string name="streak_best">Record</string>
+
     <!-- Tuile d'accès rapide (accueil) -->
     <string name="tile_history">Historique</string>
+    <string name="tile_charts">Graphiques</string>
+
+    <!-- Page Graphiques / Heatmap -->
+    <string name="charts_title">Graphiques</string>
+    <string name="cd_back">Retour</string>
+    <string name="charts_empty">Pas encore de données à visualiser. Enregistrez quelques interactions.</string>
+    <string name="heatmap_title">Activité par heure et par jour</string>
+    <string name="heatmap_subtitle">Plus une case est foncée, plus vous avez enregistré d\'interactions sur ce créneau.</string>
+    <string-array name="weekday_initials">
+        <item>L</item>
+        <item>M</item>
+        <item>M</item>
+        <item>J</item>
+        <item>V</item>
+        <item>S</item>
+        <item>D</item>
+    </string-array>
+    <string-array name="heatmap_legend">
+        <item>Moins</item>
+        <item>Plus</item>
+    </string-array>
 
     <!-- KPI -->
     <string name="kpi_title">Indicateurs</string>

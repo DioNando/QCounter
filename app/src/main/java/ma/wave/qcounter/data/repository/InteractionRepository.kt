@@ -6,6 +6,7 @@ import ma.wave.qcounter.data.local.InteractionDao
 import ma.wave.qcounter.data.local.InteractionEntity
 import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.InteractionStats
+import ma.wave.qcounter.data.model.StreakStats
 
 /**
  * Source de vérité unique de l'app. La table `interactions` est l'origine des
@@ -29,11 +30,23 @@ class InteractionRepository(
     /** Historique complet, le plus récent en tête. */
     val history: Flow<List<InteractionEntity>> = dao.observeAll()
 
+    /** Séries (en cours / record), dérivées réactivement de l'historique. */
+    val streaks: Flow<StreakStats> = dao.observeAll().map { rows ->
+        StreakStats.from(rows.map { it.type })
+    }
+
     /** Enregistre une interaction et retourne son id (pour pouvoir l'annuler). */
     suspend fun record(type: AnswerType): Long =
         dao.insert(InteractionEntity(type = type, timestamp = now()))
 
     suspend fun deleteById(id: Long) = dao.deleteById(id)
+
+    /** Supprime la dernière interaction enregistrée. Retourne true si une ligne a été retirée. */
+    suspend fun deleteLast(): Boolean {
+        val last = dao.lastInteraction() ?: return false
+        dao.deleteById(last.id)
+        return true
+    }
 
     suspend fun deleteByIds(ids: List<Long>) {
         if (ids.isNotEmpty()) dao.deleteByIds(ids)
