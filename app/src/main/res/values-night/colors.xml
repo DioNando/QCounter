@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Titre « Anh » clair en thème sombre, pour rester lisible. -->
+    <color name="logo_text">#FFF1F1F1</color>
+</resources>

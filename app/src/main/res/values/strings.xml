@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">QCounter</string>
+    <string name="app_name">Anh</string>
 
     <!-- Actions d'incrémentation -->
     <string name="action_direct">Réponse Directe</string>
@@ -24,7 +24,7 @@
 
     <!-- Panneau d'action (en bas) -->
     <string name="action_panel_title">Enregistrer une réponse</string>
-    <string name="logo_content_desc">Logo QCounter</string>
+    <string name="logo_content_desc">Logo Anh</string>
 
     <!-- Annulation -->
     <string name="snackbar_recorded">Ajouté : %1$s</string>
@@ -96,11 +96,11 @@
 
     <!-- Widget, raccourcis et tuile Quick Settings -->
     <string name="widget_description">Compter une réponse sans ouvrir l\'app.</string>
-    <string name="widget_description_row">QCounter compact, sur une seule ligne.</string>
-    <string name="widget_description_buttons">QCounter 2×1 : total + Directe et Question.</string>
-    <string name="widget_description_compact">QCounter 1×1 : compter une « Question » d\'un tap.</string>
+    <string name="widget_description_row">Anh compact, sur une seule ligne.</string>
+    <string name="widget_description_buttons">Anh 2×1 : total + Directe et Question.</string>
+    <string name="widget_description_compact">Anh 1×1 : compter une « Question » d\'un tap.</string>
     <string name="shortcut_recorded">Ajouté : %1$s</string>
-    <string name="tile_qs_label">QCounter · Question</string>
+    <string name="tile_qs_label">Anh · Question</string>
     <string name="tile_qs_subtitle">%1$d interactions</string>
 
     <!-- Page Graphiques / Heatmap -->
@@ -136,6 +136,7 @@
     <string name="nav_history">Historique</string>
     <string name="history_title">Historique des interactions</string>
     <string name="history_empty">Aucune interaction enregistrée pour l\'instant.</string>
+    <string name="history_show_more">Afficher plus (%1$d restants)</string>
     <string name="action_reset">Réinitialiser</string>
     <string name="reset_dialog_title">Réinitialiser les compteurs ?</string>
     <string name="reset_dialog_message">Toutes les interactions enregistrées seront définitivement supprimées.</string>

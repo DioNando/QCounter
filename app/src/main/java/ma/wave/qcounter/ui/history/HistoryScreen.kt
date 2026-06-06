@@ -7,12 +7,17 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
@@ -21,13 +26,12 @@ import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Inbox
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -42,10 +46,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -69,6 +75,7 @@ fun HistoryScreen(
 
     var showResetDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var visibleCount by rememberSaveable { mutableStateOf(100) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val undoLabel = stringResource(R.string.action_undo)
@@ -155,12 +162,15 @@ fun HistoryScreen(
                     .padding(innerPadding),
             )
         } else {
+            val shown = history.take(visibleCount)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                items(history, key = { it.id }) { interaction ->
+                items(shown, key = { it.id }) { interaction ->
                     InteractionRow(
                         interaction = interaction,
                         selected = selectedIds.contains(interaction.id),
@@ -170,7 +180,18 @@ fun HistoryScreen(
                         },
                         onLongClick = { viewModel.toggleSelection(interaction.id) },
                     )
-                    HorizontalDivider()
+                }
+                if (history.size > visibleCount) {
+                    item(key = "show_more") {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            TextButton(onClick = { visibleCount += 100 }) {
+                                Text(stringResource(R.string.history_show_more, history.size - visibleCount))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -206,7 +227,7 @@ fun HistoryScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun InteractionRow(
     interaction: InteractionEntity,
@@ -218,14 +239,23 @@ private fun InteractionRow(
     val visual = answerTypeVisual(interaction.type)
     val container =
         if (selected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surface
+        else MaterialTheme.colorScheme.surfaceContainerHigh
 
-    ListItem(
-        modifier = Modifier.combinedClickable(
-            onClick = onClick,
-            onLongClick = onLongClick,
-        ),
-        leadingContent = {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = container),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(68.dp)
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -239,14 +269,23 @@ private fun InteractionRow(
                     modifier = Modifier.size(22.dp),
                 )
             }
-        },
-        headlineContent = { Text(visual.label) },
-        supportingContent = { Text(formatTimestamp(interaction.timestamp)) },
-        trailingContent = if (inSelection) {
-            { Checkbox(checked = selected, onCheckedChange = { onClick() }) }
-        } else null,
-        colors = ListItemDefaults.colors(containerColor = container),
-    )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = visual.label,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = formatTimestamp(interaction.timestamp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (inSelection) {
+                Checkbox(checked = selected, onCheckedChange = { onClick() })
+            }
+        }
+    }
 }
 
 @Composable

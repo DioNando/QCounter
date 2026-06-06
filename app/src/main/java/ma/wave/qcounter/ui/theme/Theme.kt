@@ -12,23 +12,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColors = lightColorScheme(
-    primary = PrimaryLight,
+    primary = InkLight,
     onPrimary = Color.White,
-    primaryContainer = ContainerLight,
-    onPrimaryContainer = OnContainerLight,
-    secondary = BrandSlate,
+    primaryContainer = BrandYellow,
+    onPrimaryContainer = OnYellowLight,
+    secondary = SecondaryLight,
     onSecondary = Color.White,
+    secondaryContainer = BrandYellowDeep,
+    onSecondaryContainer = OnYellowLight,
     tertiary = BrandRed,
     onTertiary = Color.White,
 )
 
 private val DarkColors = darkColorScheme(
-    primary = PrimaryDark,
-    onPrimary = OnPrimaryDark,
+    primary = YellowDark,
+    onPrimary = OnYellowDark,
     primaryContainer = ContainerDark,
     onPrimaryContainer = OnContainerDark,
-    secondary = Color(0xFFAFC4DA),
-    tertiary = Color(0xFFFF8A80),
+    secondary = Color(0xFFE0CE92),
+    secondaryContainer = ContainerDark,
+    onSecondaryContainer = OnContainerDark,
+    tertiary = Color(0xFFFF8A78),
 )
 
 /** Material You disponible uniquement à partir d'Android 12 (API 31). */

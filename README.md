@@ -1,6 +1,8 @@
-# QCounter — Android natif (Kotlin + Jetpack Compose)
+# Anh — Android natif (Kotlin + Jetpack Compose)
 
-QCounter est une application Android de **suivi comportemental conversationnel**. Pendant un
+> *Anciennement « QCounter ». Le `applicationId`/package restent `ma.wave.qcounter`.*
+
+Anh est une application Android de **suivi comportemental conversationnel**. Pendant un
 échange (entretien, négociation, discussion délicate…), trois boutons permettent d'enregistrer
 **comment l'interlocuteur·rice répond** :
 
@@ -14,7 +16,7 @@ des visualisations, un historique et des graphiques temporels.
 ## 🎯 À quoi ça sert ?
 
 On a souvent une impression subjective (« elle ne répond jamais franchement », « il botte toujours
-en touche ») sans pouvoir l'objectiver. QCounter transforme cette impression en **données** :
+en touche ») sans pouvoir l'objectiver. Anh transforme cette impression en **données** :
 
 - **Quantifier** une tendance plutôt que la deviner — combien de fois, dans quelles proportions.
 - **Repérer des schémas** : pics d'esquive, créneaux horaires, évolution dans le temps.
@@ -174,11 +176,11 @@ app/src/main/java/ma/wave/qcounter/
 
 ## 🎨 Identité visuelle
 
-Charte de marque : **dégradé bleu `#6DD5ED` → `#2193B0`** (cf. logo), déclinée dans le thème (couleur
-primaire bleue, conteneurs dérivés) et dans la palette d'indicateurs **Lagon** par défaut (bleu ·
-rouge · ardoise). L'utilisateur peut aussi activer **Material You** (couleurs dynamiques tirées du
-fond d'écran, Android 12+). Le détail des couleurs (et les besoins pour le logo) se trouve dans
-[`LOGO.md`](LOGO.md).
+Charte de marque : **jaune** (`#FFE167` → `#FDD05E`, cf. logo) + **rouge** `#D5442D`. Le jaune habille
+les **surfaces** (héro, FAB, conteneurs) tandis que les **accents de premier plan** (le « Q », icônes,
+barres) sont en **encre foncée** pour la lisibilité (et en jaune clair sur fond sombre). Palette
+d'indicateurs **Lagon** par défaut : sarcelle · rouge · gris. L'utilisateur peut aussi activer
+**Material You** (couleurs dynamiques tirées du fond d'écran, Android 12+). Détail dans [`LOGO.md`](LOGO.md).
 
 ---
 

@@ -14,10 +14,16 @@ data class AccentPalette(
 /** Presets fixes sélectionnables dans les réglages. */
 val AppPalettes: List<AccentPalette> = listOf(
     AccentPalette(
-        name = "Lagon",               // charte de marque (logo bleu #6dd5ed → #2193b0)
-        direct = Color(0xFF2193B0),   // bleu de marque (couleur principale)
-        question = Color(0xFFE53935), // rouge (accent secondaire)
-        unknown = Color(0xFF46627E),  // bleu ardoise neutre
+        name = "Soleil",              // palette de marque (par défaut)
+        direct = Color(0xFFF2B705),   // jaune doré (clarté) — assombri pour rester lisible
+        question = Color(0xFFD5442D), // rouge de marque (esquive)
+        unknown = Color(0xFFBFA94E),  // jaune-or grisé (indécision)
+    ),
+    AccentPalette(
+        name = "Lagon",               // alternative sarcelle / rouge / gris
+        direct = Color(0xFF1E8A8A),   // sarcelle (clarté)
+        question = Color(0xFFD5442D), // rouge de marque (esquive)
+        unknown = Color(0xFF6B6B72),  // gris (indécision)
     ),
     AccentPalette(
         name = "Ciel",

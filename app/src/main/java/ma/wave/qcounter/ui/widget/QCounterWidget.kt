@@ -3,6 +3,7 @@ package ma.wave.qcounter.ui.widget
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -40,11 +41,15 @@ import ma.wave.qcounter.data.model.InteractionStats
 /** Clé d'argument transportant le type de réponse à enregistrer depuis le widget. */
 val RecordTypeKey = ActionParameters.Key<String>("qc_record_type")
 
-// Couleurs de marque (palette « Lagon ») pour les boutons d'action du widget.
-// Le fond et le texte, eux, suivent Material You via GlanceTheme.
-private val DirectColor = Color(0xFF2193B0)   // bleu de marque
-private val QuestionColor = Color(0xFFE53935) // rouge
-private val UnknownColor = Color(0xFF46627E)  // ardoise
+// Boutons : palette de marque « Soleil » (le fond, lui, suit Material You via GlanceTheme).
+private val DirectColor = Color(0xFFF2B705)   // doré
+private val QuestionColor = Color(0xFFD5442D) // rouge
+private val UnknownColor = Color(0xFFBFA94E)  // or grisé
+private val InkOnLight = Color(0xFF2A2410)    // texte foncé pour les tuiles claires
+
+/** Couleur de texte lisible selon la luminosité de la tuile. */
+private fun onTile(tile: Color): Color =
+    if (tile.luminance() > 0.4f) InkOnLight else Color.White
 
 /** Widget d'écran d'accueil : total + 3 boutons pour compter sans ouvrir l'app. */
 class QCounterWidget : GlanceAppWidget() {
@@ -69,11 +74,8 @@ private fun WidgetContent(stats: InteractionStats) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "QCounter",
-            style = TextStyle(
-                color = GlanceTheme.colors.primary,
-                fontWeight = FontWeight.Bold,
-            ),
+            text = "Anh",
+            style = TextStyle(color = GlanceTheme.colors.primary, fontWeight = FontWeight.Bold),
         )
         Text(
             text = "${stats.totalInteractions}",
@@ -94,17 +96,19 @@ private fun WidgetContent(stats: InteractionStats) {
     }
 }
 
+/** Bouton : tuile pleine (palette de marque), texte à contraste automatique. */
 @Composable
 private fun WidgetButton(
     short: String,
     count: Int,
     type: AnswerType,
-    color: Color,
+    tile: Color,
     modifier: GlanceModifier,
 ) {
+    val content = ColorProvider(onTile(tile))
     Column(
         modifier = modifier
-            .background(color)
+            .background(tile)
             .cornerRadius(12.dp)
             .clickable(
                 actionRunCallback<RecordActionCallback>(
@@ -116,11 +120,11 @@ private fun WidgetButton(
     ) {
         Text(
             text = "$count",
-            style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold),
+            style = TextStyle(color = content, fontWeight = FontWeight.Bold),
         )
         Text(
             text = short,
-            style = TextStyle(color = ColorProvider(Color.White), textAlign = TextAlign.Center),
+            style = TextStyle(color = content, textAlign = TextAlign.Center),
         )
     }
 }
@@ -176,10 +180,11 @@ class QCounterCompactWidget : GlanceAppWidget() {
 
 @Composable
 private fun WidgetCompactContent(stats: InteractionStats) {
+    val content = ColorProvider(onTile(QuestionColor))
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(GlanceTheme.colors.primaryContainer)
+            .background(QuestionColor)
             .cornerRadius(16.dp)
             .clickable(
                 actionRunCallback<RecordActionCallback>(
@@ -192,15 +197,11 @@ private fun WidgetCompactContent(stats: InteractionStats) {
     ) {
         Text(
             text = "${stats.questionAnswers}",
-            style = TextStyle(
-                color = GlanceTheme.colors.onPrimaryContainer,
-                fontWeight = FontWeight.Bold,
-                fontSize = 26.sp,
-            ),
+            style = TextStyle(color = content, fontWeight = FontWeight.Bold, fontSize = 26.sp),
         )
         Text(
             text = "Q",
-            style = TextStyle(color = GlanceTheme.colors.onPrimaryContainer),
+            style = TextStyle(color = content),
         )
     }
 }

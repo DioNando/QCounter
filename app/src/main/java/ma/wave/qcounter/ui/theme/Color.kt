@@ -2,24 +2,28 @@ package ma.wave.qcounter.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Charte de marque (voir logo) : dégradé bleu clair #6dd5ed → bleu #2193b0.
-val BrandBlueLight = Color(0xFF6DD5ED)
-val BrandBlueDeep = Color(0xFF2193B0)
-val BrandSlate = Color(0xFF46627E)   // ardoise neutre
-val BrandRed = Color(0xFFE53935)     // accent secondaire (rouge)
+// Charte de marque (logo) : jaune #ffe167 / #fdd05e, rouge #d5442d.
+val BrandYellow = Color(0xFFFFE167)
+val BrandYellowDeep = Color(0xFFFDD05E)
+val BrandRed = Color(0xFFD5442D)
 
-// Thème clair + conteneurs doux.
-val PrimaryLight = Color(0xFF1C82A0)      // bleu de marque assombri pour un bon contraste sur blanc
-val ContainerLight = Color(0xFFBDE7F2)
-val OnContainerLight = Color(0xFF05323F)
+// Accents d'indicateurs de la palette par défaut « Lagon ».
+val IndicatorDirect = Color(0xFF1E8A8A)   // sarcelle (clarté)
+val IndicatorQuestion = BrandRed          // rouge (esquive en miroir)
+val IndicatorUnknown = Color(0xFF6B6B72)  // gris (indécision)
 
-// Thème sombre.
-val PrimaryDark = Color(0xFF6DD5ED)
-val OnPrimaryDark = Color(0xFF003544)
-val ContainerDark = Color(0xFF134B5C)
-val OnContainerDark = Color(0xFFBDE7F2)
+// Thème clair : surfaces jaunes, accents de premier plan en encre foncée chaude.
+val InkLight = Color(0xFF2E2A22)
+val OnYellowLight = Color(0xFF2A2410)
+val SecondaryLight = Color(0xFF5E5326)
+
+// Thème sombre : accents en jaune (clairs sur fond sombre), conteneurs sombres chauds.
+val YellowDark = Color(0xFFFFE167)
+val OnYellowDark = Color(0xFF322B00)
+val ContainerDark = Color(0xFF4A3D10)
+val OnContainerDark = Color(0xFFFFE6A0)
 
 // Accents legacy (composants non utilisés : DistributionBar / KpiDashboard) — alignés sur la marque.
-val AccentDirect = BrandBlueDeep       // Réponse Directe
-val AccentQuestion = BrandRed          // Question par une Question
-val AccentUnknown = BrandSlate         // Je ne sais pas / esquive
+val AccentDirect = IndicatorDirect
+val AccentQuestion = IndicatorQuestion
+val AccentUnknown = IndicatorUnknown

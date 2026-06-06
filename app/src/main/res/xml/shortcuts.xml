@@ -3,7 +3,7 @@
     <shortcut
         android:shortcutId="record_direct"
         android:enabled="true"
-        android:icon="@drawable/ic_logo"
+        android:icon="@drawable/ic_shortcut_direct"
         android:shortcutShortLabel="@string/legend_direct"
         android:shortcutLongLabel="@string/action_direct">
         <intent
@@ -18,7 +18,7 @@
     <shortcut
         android:shortcutId="record_question"
         android:enabled="true"
-        android:icon="@drawable/ic_logo"
+        android:icon="@drawable/ic_shortcut_question"
         android:shortcutShortLabel="@string/legend_question"
         android:shortcutLongLabel="@string/action_question">
         <intent
@@ -33,7 +33,7 @@
     <shortcut
         android:shortcutId="record_unknown"
         android:enabled="true"
-        android:icon="@drawable/ic_logo"
+        android:icon="@drawable/ic_shortcut_unknown"
         android:shortcutShortLabel="@string/legend_unknown"
         android:shortcutLongLabel="@string/action_unknown">
         <intent
