@@ -92,7 +92,7 @@ et le **record** (plus longue série jamais atteinte).
 
 **Personnalisation**
 - **Couleurs dynamiques Material You** (Android 12+) activables en option.
-- **3 palettes** d'indicateurs (Ciel / Forêt / Crépuscule).
+- **4 palettes** d'indicateurs : **Lagon** (charte de marque, par défaut) / Ciel / Forêt / Crépuscule.
 - **Libellés des 3 boutons** personnalisables (longs et courts).
 
 **Hors application**
@@ -174,9 +174,10 @@ app/src/main/java/ma/wave/qcounter/
 
 ## 🎨 Identité visuelle
 
-Palette de marque centrée sur le **bleu ciel**, avec accents **rouge** et **gris** pour les
-indicateurs. L'utilisateur peut aussi activer **Material You** (couleurs dynamiques tirées du fond
-d'écran, Android 12+). Le détail des couleurs (et les besoins pour le logo) se trouve dans
+Charte de marque : **dégradé bleu `#6DD5ED` → `#2193B0`** (cf. logo), déclinée dans le thème (couleur
+primaire bleue, conteneurs dérivés) et dans la palette d'indicateurs **Lagon** par défaut (bleu ·
+rouge · ardoise). L'utilisateur peut aussi activer **Material You** (couleurs dynamiques tirées du
+fond d'écran, Android 12+). Le détail des couleurs (et les besoins pour le logo) se trouve dans
 [`LOGO.md`](LOGO.md).
 
 ---

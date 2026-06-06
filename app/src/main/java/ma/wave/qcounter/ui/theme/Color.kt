@@ -2,15 +2,24 @@ package ma.wave.qcounter.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Palette de marque (bleu ciel) + conteneurs doux.
-val SkyBlue = Color(0xFF0288D1)
-val SkyBlue80 = Color(0xFF8ED1F2)
-val SkyContainerLight = Color(0xFFCDE8FA)
-val OnSkyContainerLight = Color(0xFF06324A)
-val SkyContainerDark = Color(0xFF0B3A52)
-val OnSkyContainerDark = Color(0xFFCDE8FA)
+// Charte de marque (voir logo) : dégradé bleu clair #6dd5ed → bleu #2193b0.
+val BrandBlueLight = Color(0xFF6DD5ED)
+val BrandBlueDeep = Color(0xFF2193B0)
+val BrandSlate = Color(0xFF46627E)   // ardoise neutre
+val BrandRed = Color(0xFFE53935)     // accent secondaire (rouge)
 
-// Accents des indicateurs : bleu ciel / rouge / gris.
-val AccentDirect = SkyBlue            // Réponse Directe
-val AccentQuestion = Color(0xFFE53935) // Question par une Question (rouge)
-val AccentUnknown = Color(0xFF64748B)  // Je ne sais pas / esquive (gris ardoise)
+// Thème clair + conteneurs doux.
+val PrimaryLight = Color(0xFF1C82A0)      // bleu de marque assombri pour un bon contraste sur blanc
+val ContainerLight = Color(0xFFBDE7F2)
+val OnContainerLight = Color(0xFF05323F)
+
+// Thème sombre.
+val PrimaryDark = Color(0xFF6DD5ED)
+val OnPrimaryDark = Color(0xFF003544)
+val ContainerDark = Color(0xFF134B5C)
+val OnContainerDark = Color(0xFFBDE7F2)
+
+// Accents legacy (composants non utilisés : DistributionBar / KpiDashboard) — alignés sur la marque.
+val AccentDirect = BrandBlueDeep       // Réponse Directe
+val AccentQuestion = BrandRed          // Question par une Question
+val AccentUnknown = BrandSlate         // Je ne sais pas / esquive

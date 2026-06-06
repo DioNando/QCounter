@@ -40,11 +40,11 @@ import ma.wave.qcounter.data.model.InteractionStats
 /** Clé d'argument transportant le type de réponse à enregistrer depuis le widget. */
 val RecordTypeKey = ActionParameters.Key<String>("qc_record_type")
 
-// Couleurs de marque (palette « Ciel ») pour les boutons d'action du widget.
+// Couleurs de marque (palette « Lagon ») pour les boutons d'action du widget.
 // Le fond et le texte, eux, suivent Material You via GlanceTheme.
-private val DirectColor = Color(0xFF0288D1)
-private val QuestionColor = Color(0xFFE53935)
-private val UnknownColor = Color(0xFF64748B)
+private val DirectColor = Color(0xFF2193B0)   // bleu de marque
+private val QuestionColor = Color(0xFFE53935) // rouge
+private val UnknownColor = Color(0xFF46627E)  // ardoise
 
 /** Widget d'écran d'accueil : total + 3 boutons pour compter sans ouvrir l'app. */
 class QCounterWidget : GlanceAppWidget() {
