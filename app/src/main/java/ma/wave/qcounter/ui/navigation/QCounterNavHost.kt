@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ma.wave.qcounter.data.model.AppSettings
+import ma.wave.qcounter.data.model.EmojiIntensity
 import ma.wave.qcounter.data.model.HomeChart
 import ma.wave.qcounter.ui.ViewModelFactory
 import ma.wave.qcounter.ui.history.HistoryScreen
@@ -29,6 +30,9 @@ fun QCounterNavHost(
     onSetShowEmoji: (Boolean) -> Unit,
     onSetPalette: (Int) -> Unit,
     onSetHomeChart: (HomeChart) -> Unit,
+    onSetDynamicColor: (Boolean) -> Unit,
+    onSetEmojiSet: (Int) -> Unit,
+    onSetEmojiIntensity: (EmojiIntensity) -> Unit,
 ) {
     val navController = rememberNavController()
 
@@ -53,6 +57,9 @@ fun QCounterNavHost(
                 onSetShowEmoji = onSetShowEmoji,
                 onSetPalette = onSetPalette,
                 onSetHomeChart = onSetHomeChart,
+                onSetDynamicColor = onSetDynamicColor,
+                onSetEmojiSet = onSetEmojiSet,
+                onSetEmojiIntensity = onSetEmojiIntensity,
             )
         }
         composable(Routes.HISTORY) {

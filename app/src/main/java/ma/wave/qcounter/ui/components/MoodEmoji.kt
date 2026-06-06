@@ -1,14 +1,76 @@
 package ma.wave.qcounter.ui.components
 
+import ma.wave.qcounter.data.model.EmojiIntensity
 import ma.wave.qcounter.data.model.InteractionStats
 
 /**
- * Emoji « d'humeur » reflétant le comportement dominant ET son intensité.
- * Plus la part du type dominant est forte, plus l'expression est marquée — fun à voir évoluer.
+ * Jeu d'emojis « d'humeur ». Pour chaque comportement dominant (Directe / Question / Esquive),
+ * trois expressions du plus discret (palier bas) au plus marqué (palier haut), plus un visage
+ * neutre (aucune interaction) et un visage d'égalité (pas de dominant clair).
  */
-fun moodEmoji(stats: InteractionStats): String {
+data class EmojiSet(
+    val name: String,
+    val neutral: String,
+    val tie: String,
+    /** [bas, moyen, marqué] pour Réponse Directe (clarté, positif). */
+    val direct: List<String>,
+    /** [bas, moyen, marqué] pour Question par une Question (esquive, sceptique). */
+    val question: List<String>,
+    /** [bas, moyen, marqué] pour Je ne sais pas (indécision). */
+    val unknown: List<String>,
+)
+
+/** Jeux d'emojis sélectionnables dans les réglages. */
+val EmojiSets: List<EmojiSet> = listOf(
+    EmojiSet(
+        name = "Classique",
+        neutral = "🙂",
+        tie = "🤔",
+        direct = listOf("🙂", "😄", "🤩"),
+        question = listOf("❓", "🤨", "🙄"),
+        unknown = listOf("😕", "🤷", "🤯"),
+    ),
+    EmojiSet(
+        name = "Expressif",
+        neutral = "😐",
+        tie = "🤔",
+        direct = listOf("🙂", "😁", "🥳"),
+        question = listOf("🤔", "🧐", "😏"),
+        unknown = listOf("😶", "😵‍💫", "🤯"),
+    ),
+    EmojiSet(
+        name = "Animaux",
+        neutral = "🐱",
+        tie = "🐼",
+        direct = listOf("🐶", "🦁", "🦅"),
+        question = listOf("🦊", "🐍", "🦉"),
+        unknown = listOf("🐢", "🐌", "🦥"),
+    ),
+    EmojiSet(
+        name = "Météo",
+        neutral = "⚪",
+        tie = "☁️",
+        direct = listOf("🌤️", "☀️", "🌟"),
+        question = listOf("🌫️", "🌀", "⚡"),
+        unknown = listOf("🌧️", "⛈️", "🌪️"),
+    ),
+)
+
+/** Jeu d'emojis correspondant à l'index sélectionné, avec repli sur le premier. */
+fun emojiSetOf(id: Int): EmojiSet = EmojiSets.getOrElse(id) { EmojiSets[0] }
+
+/**
+ * Emoji « d'humeur » reflétant le comportement dominant ET son intensité, selon le jeu
+ * choisi et la sensibilité des paliers. Plus la part du type dominant est forte, plus
+ * l'expression est marquée — fun à voir évoluer.
+ */
+fun moodEmoji(
+    stats: InteractionStats,
+    set: EmojiSet = EmojiSets[0],
+    intensity: EmojiIntensity = EmojiIntensity.NORMAL,
+): String {
     val total = stats.totalInteractions
-    if (total == 0) return "🙂"
+    if (total == 0) return set.neutral
 
     val d = stats.directAnswers
     val q = stats.questionAnswers
@@ -16,24 +78,18 @@ fun moodEmoji(stats: InteractionStats): String {
     val max = maxOf(d, q, u)
 
     // Égalité entre au moins deux types dominants → indécis/pensif.
-    if (listOf(d, q, u).count { it == max } > 1) return "🤔"
+    if (listOf(d, q, u).count { it == max } > 1) return set.tie
 
     val share = max.toDouble() / total
-    return when (max) {
-        d -> when {                 // Réponse Directe = clarté (positif)
-            share >= 0.66 -> "🤩"
-            share >= 0.40 -> "😄"
-            else -> "🙂"
-        }
-        q -> when {                 // Question par une Question (esquive, sceptique)
-            share >= 0.66 -> "🙄"
-            share >= 0.40 -> "🤨"
-            else -> "❓"
-        }
-        else -> when {              // Je ne sais pas (indécision)
-            share >= 0.66 -> "🤯"
-            share >= 0.40 -> "🤷"
-            else -> "😕"
-        }
+    val tier = when {                       // 0 = bas, 1 = moyen, 2 = marqué
+        share >= intensity.highThreshold -> 2
+        share >= intensity.mediumThreshold -> 1
+        else -> 0
     }
+    val palette = when (max) {
+        d -> set.direct
+        q -> set.question
+        else -> set.unknown
+    }
+    return palette[tier]
 }

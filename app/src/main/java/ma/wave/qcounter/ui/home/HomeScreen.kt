@@ -57,6 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ma.wave.qcounter.R
 import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.AppSettings
+import ma.wave.qcounter.data.model.EmojiIntensity
 import ma.wave.qcounter.data.model.HomeChart
 import ma.wave.qcounter.data.model.InteractionStats
 import ma.wave.qcounter.ui.components.ActionCard
@@ -66,7 +67,9 @@ import ma.wave.qcounter.ui.components.DonutChart
 import ma.wave.qcounter.ui.components.LegendItem
 import ma.wave.qcounter.ui.components.WaffleChart
 import ma.wave.qcounter.ui.components.SettingsSheet
+import ma.wave.qcounter.ui.components.EmojiSet
 import ma.wave.qcounter.ui.components.answerTypeVisual
+import ma.wave.qcounter.ui.components.emojiSetOf
 import ma.wave.qcounter.ui.components.moodEmoji
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,6 +81,9 @@ fun HomeScreen(
     onSetShowEmoji: (Boolean) -> Unit,
     onSetPalette: (Int) -> Unit,
     onSetHomeChart: (HomeChart) -> Unit,
+    onSetDynamicColor: (Boolean) -> Unit,
+    onSetEmojiSet: (Int) -> Unit,
+    onSetEmojiIntensity: (EmojiIntensity) -> Unit,
 ) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -167,6 +173,8 @@ fun HomeScreen(
                 stats = stats,
                 showEmoji = settings.showEmoji,
                 homeChart = settings.homeChart,
+                emojiSet = emojiSetOf(settings.emojiSetId),
+                emojiIntensity = settings.emojiIntensity,
                 modifier = Modifier.padding(top = 8.dp),
             )
             NavTile(
@@ -185,6 +193,9 @@ fun HomeScreen(
             onSetShowEmoji = onSetShowEmoji,
             onSetPalette = onSetPalette,
             onSetHomeChart = onSetHomeChart,
+            onSetDynamicColor = onSetDynamicColor,
+            onSetEmojiSet = onSetEmojiSet,
+            onSetEmojiIntensity = onSetEmojiIntensity,
             onDismiss = { showSettings = false },
         )
     }
@@ -195,6 +206,8 @@ private fun HeroCard(
     stats: InteractionStats,
     showEmoji: Boolean,
     homeChart: HomeChart,
+    emojiSet: EmojiSet,
+    emojiIntensity: EmojiIntensity,
     modifier: Modifier = Modifier,
 ) {
     val direct = answerTypeVisual(AnswerType.DIRECT)
@@ -221,7 +234,7 @@ private fun HeroCard(
             )
 
             if (showEmoji) {
-                Crossfade(targetState = moodEmoji(stats), label = "mood") { emoji ->
+                Crossfade(targetState = moodEmoji(stats, emojiSet, emojiIntensity), label = "mood") { emoji ->
                     Text(text = emoji, fontSize = 34.sp)
                 }
             }

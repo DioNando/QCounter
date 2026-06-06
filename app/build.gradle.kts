@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "ma.wave.qcounter"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "ma.wave.qcounter"

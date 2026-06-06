@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
             val unknown by animateColorAsState(target.unknown, animSpec, label = "accent-unknown")
             val palette = AccentPalette(target.name, direct, question, unknown)
 
-            QCounterTheme {
+            QCounterTheme(dynamicColor = settings.dynamicColor) {
                 CompositionLocalProvider(LocalAccentPalette provides palette) {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         QCounterNavHost(
@@ -53,6 +53,9 @@ class MainActivity : ComponentActivity() {
                             onSetShowEmoji = { scope.launch { settingsRepository.setShowEmoji(it) } },
                             onSetPalette = { scope.launch { settingsRepository.setPalette(it) } },
                             onSetHomeChart = { scope.launch { settingsRepository.setHomeChart(it) } },
+                            onSetDynamicColor = { scope.launch { settingsRepository.setDynamicColor(it) } },
+                            onSetEmojiSet = { scope.launch { settingsRepository.setEmojiSet(it) } },
+                            onSetEmojiIntensity = { scope.launch { settingsRepository.setEmojiIntensity(it) } },
                         )
                     }
                 }
