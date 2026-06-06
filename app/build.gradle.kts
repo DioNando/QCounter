@@ -64,5 +64,8 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
 
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+
     debugImplementation(libs.androidx.ui.tooling)
 }

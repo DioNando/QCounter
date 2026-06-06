@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="record_direct"
+        android:enabled="true"
+        android:icon="@drawable/ic_logo"
+        android:shortcutShortLabel="@string/legend_direct"
+        android:shortcutLongLabel="@string/action_direct">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ma.wave.qcounter"
+            android:targetClass="ma.wave.qcounter.QuickRecordActivity">
+            <extra
+                android:name="qc_type"
+                android:value="DIRECT" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="record_question"
+        android:enabled="true"
+        android:icon="@drawable/ic_logo"
+        android:shortcutShortLabel="@string/legend_question"
+        android:shortcutLongLabel="@string/action_question">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ma.wave.qcounter"
+            android:targetClass="ma.wave.qcounter.QuickRecordActivity">
+            <extra
+                android:name="qc_type"
+                android:value="QUESTION" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="record_unknown"
+        android:enabled="true"
+        android:icon="@drawable/ic_logo"
+        android:shortcutShortLabel="@string/legend_unknown"
+        android:shortcutLongLabel="@string/action_unknown">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ma.wave.qcounter"
+            android:targetClass="ma.wave.qcounter.QuickRecordActivity">
+            <extra
+                android:name="qc_type"
+                android:value="UNKNOWN" />
+        </intent>
+    </shortcut>
+</shortcuts>

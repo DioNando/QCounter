@@ -35,6 +35,10 @@ interface InteractionDao {
     @Query("SELECT * FROM interactions ORDER BY timestamp DESC")
     fun observeAll(): Flow<List<InteractionEntity>>
 
+    /** Lecture ponctuelle de toutes les interactions (export). */
+    @Query("SELECT * FROM interactions ORDER BY timestamp ASC")
+    suspend fun getAll(): List<InteractionEntity>
+
     /** Dernière interaction enregistrée (pour l'annulation par secousse / bouton flottant). */
     @Query("SELECT * FROM interactions ORDER BY timestamp DESC, id DESC LIMIT 1")
     suspend fun lastInteraction(): InteractionEntity?

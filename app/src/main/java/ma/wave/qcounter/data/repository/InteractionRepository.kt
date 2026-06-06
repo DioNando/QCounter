@@ -60,4 +60,22 @@ class InteractionRepository(
     suspend fun reset() {
         dao.clear()
     }
+
+    /** Toutes les interactions, pour l'export. */
+    suspend fun exportAll(): List<InteractionEntity> = dao.getAll()
+
+    /**
+     * Importe des interactions sans écraser l'existant ni créer de doublon : on ignore celles
+     * dont le couple (type, horodatage) est déjà présent, ainsi que les répétitions du fichier.
+     * Retourne le nombre d'interactions réellement ajoutées.
+     */
+    suspend fun importMerging(items: List<Pair<AnswerType, Long>>): Int {
+        val existing = dao.getAll().map { it.type to it.timestamp }.toHashSet()
+        val toInsert = items
+            .distinct()
+            .filter { it !in existing }
+            .map { (type, timestamp) -> InteractionEntity(type = type, timestamp = timestamp) }
+        if (toInsert.isNotEmpty()) dao.insertAll(toInsert)
+        return toInsert.size
+    }
 }

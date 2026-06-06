@@ -1,5 +1,8 @@
 package ma.wave.qcounter.ui.home
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
@@ -50,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -78,6 +82,7 @@ import ma.wave.qcounter.ui.components.SettingsSheet
 import ma.wave.qcounter.ui.components.ClarityScoreCard
 import ma.wave.qcounter.ui.components.EmojiSet
 import ma.wave.qcounter.ui.components.StreakCard
+import ma.wave.qcounter.ui.components.answerTypeShortLabel
 import ma.wave.qcounter.ui.components.answerTypeVisual
 import ma.wave.qcounter.ui.components.emojiSetOf
 import ma.wave.qcounter.ui.components.moodEmoji
@@ -97,6 +102,8 @@ fun HomeScreen(
     onSetDynamicColor: (Boolean) -> Unit,
     onSetEmojiSet: (Int) -> Unit,
     onSetEmojiIntensity: (EmojiIntensity) -> Unit,
+    onSetLongLabel: (AnswerType, String) -> Unit,
+    onSetShortLabel: (AnswerType, String) -> Unit,
 ) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
     val streaks by viewModel.streaks.collectAsStateWithLifecycle()
@@ -104,6 +111,32 @@ fun HomeScreen(
     var discreet by rememberSaveable { mutableStateOf(false) }
 
     val haptics = LocalHapticFeedback.current
+    val context = LocalContext.current
+
+    // Import / export via le Storage Access Framework (sélecteur de fichiers système).
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri ->
+        if (uri != null) viewModel.exportTo(context.contentResolver, uri) { ok ->
+            Toast.makeText(
+                context,
+                context.getString(if (ok) R.string.export_success else R.string.export_error),
+                Toast.LENGTH_SHORT,
+            ).show()
+        }
+    }
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) viewModel.importFrom(context.contentResolver, uri) { added ->
+            val message = if (added == null) {
+                context.getString(R.string.import_error)
+            } else {
+                context.getString(R.string.import_success, added)
+            }
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     // Annulation éphémère : un bouton flottant apparaît après chaque saisie puis disparaît,
     // et une secousse de l'appareil annule la dernière interaction (remplace le snackbar).
@@ -262,6 +295,14 @@ fun HomeScreen(
             onSetDynamicColor = onSetDynamicColor,
             onSetEmojiSet = onSetEmojiSet,
             onSetEmojiIntensity = onSetEmojiIntensity,
+            onSetLongLabel = onSetLongLabel,
+            onSetShortLabel = onSetShortLabel,
+            onExport = { exportLauncher.launch("qcounter-export.json") },
+            onImport = {
+                importLauncher.launch(
+                    arrayOf("application/json", "text/plain", "application/octet-stream"),
+                )
+            },
             onDismiss = { showSettings = false },
         )
     }
@@ -340,7 +381,8 @@ private fun HeroCard(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
 
-            if (showEmoji) {
+            // Pour le waffle, l'emoji est agrandi et placé en regard du total (voir branche WAFFLE).
+            if (showEmoji && homeChart != HomeChart.WAFFLE) {
                 Crossfade(targetState = moodEmoji(stats, emojiSet, emojiIntensity), label = "mood") { emoji ->
                     Text(text = emoji, fontSize = 34.sp)
                 }
@@ -348,7 +390,25 @@ private fun HeroCard(
 
             when (homeChart) {
                 HomeChart.WAFFLE -> {
-                    HeroVolume(stats.totalInteractions)
+                    if (showEmoji) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Crossfade(
+                                targetState = moodEmoji(stats, emojiSet, emojiIntensity),
+                                label = "mood",
+                            ) { emoji ->
+                                Text(text = emoji, fontSize = 52.sp)
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                HeroVolume(stats.totalInteractions)
+                            }
+                        }
+                    } else {
+                        HeroVolume(stats.totalInteractions)
+                    }
                     WaffleChart(stats = stats, modifier = Modifier.padding(vertical = 4.dp))
                 }
 
@@ -370,9 +430,9 @@ private fun HeroCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
-                        LegendItem(direct.accent, stringResource(R.string.legend_direct), stats.directAnswers)
-                        LegendItem(question.accent, stringResource(R.string.legend_question), stats.questionAnswers)
-                        LegendItem(unknown.accent, stringResource(R.string.legend_unknown), stats.unknownAnswers)
+                        LegendItem(direct.accent, answerTypeShortLabel(AnswerType.DIRECT), stats.directAnswers)
+                        LegendItem(question.accent, answerTypeShortLabel(AnswerType.QUESTION), stats.questionAnswers)
+                        LegendItem(unknown.accent, answerTypeShortLabel(AnswerType.UNKNOWN), stats.unknownAnswers)
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),

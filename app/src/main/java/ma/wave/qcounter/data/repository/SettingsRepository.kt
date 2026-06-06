@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import ma.wave.qcounter.data.model.AnswerLabels
+import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.AppSettings
 import ma.wave.qcounter.data.model.EmojiIntensity
 import ma.wave.qcounter.data.model.HomeChart
@@ -23,6 +26,10 @@ class SettingsRepository(private val context: Context) {
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val EMOJI_SET = intPreferencesKey("emoji_set")
         val EMOJI_INTENSITY = intPreferencesKey("emoji_intensity")
+
+        // Libellés personnalisés (longs et courts) par type.
+        fun longLabel(type: AnswerType) = stringPreferencesKey("label_long_${type.name}")
+        fun shortLabel(type: AnswerType) = stringPreferencesKey("label_short_${type.name}")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -35,6 +42,14 @@ class SettingsRepository(private val context: Context) {
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: false,
             emojiSetId = prefs[Keys.EMOJI_SET] ?: 0,
             emojiIntensity = EmojiIntensity.entries.getOrElse(intensityIndex) { EmojiIntensity.NORMAL },
+            labels = AnswerLabels(
+                direct = prefs[Keys.longLabel(AnswerType.DIRECT)],
+                question = prefs[Keys.longLabel(AnswerType.QUESTION)],
+                unknown = prefs[Keys.longLabel(AnswerType.UNKNOWN)],
+                directShort = prefs[Keys.shortLabel(AnswerType.DIRECT)],
+                questionShort = prefs[Keys.shortLabel(AnswerType.QUESTION)],
+                unknownShort = prefs[Keys.shortLabel(AnswerType.UNKNOWN)],
+            ),
         )
     }
 
@@ -60,5 +75,21 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setEmojiIntensity(intensity: EmojiIntensity) {
         context.dataStore.edit { it[Keys.EMOJI_INTENSITY] = intensity.ordinal }
+    }
+
+    /** Définit (ou réinitialise si vide) le libellé long d'un bouton. */
+    suspend fun setLongLabel(type: AnswerType, value: String) {
+        context.dataStore.edit { prefs ->
+            val key = Keys.longLabel(type)
+            if (value.isBlank()) prefs.remove(key) else prefs[key] = value.trim()
+        }
+    }
+
+    /** Définit (ou réinitialise si vide) le libellé court d'un bouton. */
+    suspend fun setShortLabel(type: AnswerType, value: String) {
+        context.dataStore.edit { prefs ->
+            val key = Keys.shortLabel(type)
+            if (value.isBlank()) prefs.remove(key) else prefs[key] = value.trim()
+        }
     }
 }

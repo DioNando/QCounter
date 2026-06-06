@@ -14,6 +14,19 @@ enum class EmojiIntensity(val mediumThreshold: Double, val highThreshold: Double
     STRONG(mediumThreshold = 0.33, highThreshold = 0.55),
 }
 
+/**
+ * Libellés personnalisés des 3 boutons (null = libellé par défaut traduit).
+ * Purement cosmétique : la sémantique des KPI/score/emoji reste inchangée.
+ */
+data class AnswerLabels(
+    val direct: String? = null,
+    val question: String? = null,
+    val unknown: String? = null,
+    val directShort: String? = null,
+    val questionShort: String? = null,
+    val unknownShort: String? = null,
+)
+
 /** Préférences utilisateur persistées. */
 data class AppSettings(
     val showEmoji: Boolean = true,
@@ -25,4 +38,6 @@ data class AppSettings(
     val emojiSetId: Int = 0,
     /** Sensibilité des paliers d'intensité de l'emoji. */
     val emojiIntensity: EmojiIntensity = EmojiIntensity.NORMAL,
+    /** Libellés personnalisés des 3 boutons (cosmétique). */
+    val labels: AnswerLabels = AnswerLabels(),
 )

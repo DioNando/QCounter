@@ -26,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ma.wave.qcounter.R
-import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.StreakStats
 
 /** Carte « Séries » : série en cours et record, avec icône/couleur du type concerné. */
@@ -73,7 +72,7 @@ fun StreakCard(streaks: StreakStats, modifier: Modifier = Modifier) {
                 StreakStat(
                     caption = stringResource(R.string.streak_current),
                     count = streaks.currentLength,
-                    typeLabel = shortLabel(currentType),
+                    typeLabel = answerTypeShortLabel(currentType),
                     accent = current.accent,
                     modifier = Modifier.weight(1f),
                 )
@@ -81,7 +80,7 @@ fun StreakCard(streaks: StreakStats, modifier: Modifier = Modifier) {
                     StreakStat(
                         caption = stringResource(R.string.streak_best),
                         count = streaks.bestLength,
-                        typeLabel = shortLabel(bestType),
+                        typeLabel = answerTypeShortLabel(bestType),
                         accent = best.accent,
                         modifier = Modifier.weight(1f),
                     )
@@ -90,16 +89,6 @@ fun StreakCard(streaks: StreakStats, modifier: Modifier = Modifier) {
         }
     }
 }
-
-/** Libellé court du type (Directe / Question / Esquive), adapté aux espaces étroits. */
-@Composable
-private fun shortLabel(type: AnswerType): String = stringResource(
-    when (type) {
-        AnswerType.DIRECT -> R.string.legend_direct
-        AnswerType.QUESTION -> R.string.legend_question
-        AnswerType.UNKNOWN -> R.string.legend_unknown
-    },
-)
 
 @Composable
 private fun StreakStat(

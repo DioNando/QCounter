@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,19 +18,28 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.DonutLarge
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Mood
 import androidx.compose.material.icons.rounded.TrackChanges
+import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ma.wave.qcounter.R
+import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.AppSettings
 import ma.wave.qcounter.data.model.EmojiIntensity
 import ma.wave.qcounter.data.model.HomeChart
@@ -54,6 +65,10 @@ fun SettingsSheet(
     onSetDynamicColor: (Boolean) -> Unit,
     onSetEmojiSet: (Int) -> Unit,
     onSetEmojiIntensity: (EmojiIntensity) -> Unit,
+    onSetLongLabel: (AnswerType, String) -> Unit,
+    onSetShortLabel: (AnswerType, String) -> Unit,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -223,8 +238,129 @@ fun SettingsSheet(
                     }
                 }
             }
+
+            Text(
+                text = stringResource(R.string.settings_labels),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(R.string.settings_labels_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            LabelEditor(
+                type = AnswerType.DIRECT,
+                longCurrent = settings.labels.direct,
+                shortCurrent = settings.labels.directShort,
+                longDefault = stringResource(R.string.action_direct),
+                shortDefault = stringResource(R.string.legend_direct),
+                onSetLongLabel = onSetLongLabel,
+                onSetShortLabel = onSetShortLabel,
+            )
+            LabelEditor(
+                type = AnswerType.QUESTION,
+                longCurrent = settings.labels.question,
+                shortCurrent = settings.labels.questionShort,
+                longDefault = stringResource(R.string.action_question),
+                shortDefault = stringResource(R.string.legend_question),
+                onSetLongLabel = onSetLongLabel,
+                onSetShortLabel = onSetShortLabel,
+            )
+            LabelEditor(
+                type = AnswerType.UNKNOWN,
+                longCurrent = settings.labels.unknown,
+                shortCurrent = settings.labels.unknownShort,
+                longDefault = stringResource(R.string.action_unknown),
+                shortDefault = stringResource(R.string.legend_unknown),
+                onSetLongLabel = onSetLongLabel,
+                onSetShortLabel = onSetShortLabel,
+            )
+
+            Text(
+                text = stringResource(R.string.settings_data),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                FilledTonalButton(onClick = onExport, modifier = Modifier.weight(1f)) {
+                    Icon(
+                        imageVector = Icons.Rounded.Upload,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.settings_export))
+                }
+                OutlinedButton(onClick = onImport, modifier = Modifier.weight(1f)) {
+                    Icon(
+                        imageVector = Icons.Rounded.Download,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.settings_import))
+                }
+            }
+            Text(
+                text = stringResource(R.string.settings_import_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
+}
+
+/** Éditeur des libellés (long + court) d'un type de bouton. Vide = libellé par défaut. */
+@Composable
+private fun LabelEditor(
+    type: AnswerType,
+    longCurrent: String?,
+    shortCurrent: String?,
+    longDefault: String,
+    shortDefault: String,
+    onSetLongLabel: (AnswerType, String) -> Unit,
+    onSetShortLabel: (AnswerType, String) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            text = longDefault,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        LabelField(
+            initial = longCurrent,
+            placeholder = longDefault,
+            label = stringResource(R.string.label_field_long),
+        ) { onSetLongLabel(type, it) }
+        LabelField(
+            initial = shortCurrent,
+            placeholder = shortDefault,
+            label = stringResource(R.string.label_field_short),
+        ) { onSetShortLabel(type, it) }
+    }
+}
+
+@Composable
+private fun LabelField(
+    initial: String?,
+    placeholder: String,
+    label: String,
+    onCommit: (String) -> Unit,
+) {
+    var text by rememberSaveable { mutableStateOf(initial ?: "") }
+    OutlinedTextField(
+        value = text,
+        onValueChange = { text = it; onCommit(it) },
+        label = { Text(label) },
+        placeholder = { Text(placeholder) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 /** Ligne de réglage à interrupteur : icône + libellé (+ texte d'aide optionnel) + Switch. */

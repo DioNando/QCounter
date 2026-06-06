@@ -16,6 +16,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import ma.wave.qcounter.data.model.AppSettings
 import ma.wave.qcounter.ui.ViewModelFactory
+import ma.wave.qcounter.ui.components.LocalAnswerLabels
+import ma.wave.qcounter.ui.components.rememberAnswerLabels
 import ma.wave.qcounter.ui.navigation.QCounterNavHost
 import ma.wave.qcounter.ui.theme.AccentPalette
 import ma.wave.qcounter.ui.theme.AppPalettes
@@ -44,8 +46,13 @@ class MainActivity : ComponentActivity() {
             val unknown by animateColorAsState(target.unknown, animSpec, label = "accent-unknown")
             val palette = AccentPalette(target.name, direct, question, unknown)
 
+            val answerLabels = rememberAnswerLabels(settings.labels)
+
             QCounterTheme(dynamicColor = settings.dynamicColor) {
-                CompositionLocalProvider(LocalAccentPalette provides palette) {
+                CompositionLocalProvider(
+                    LocalAccentPalette provides palette,
+                    LocalAnswerLabels provides answerLabels,
+                ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         QCounterNavHost(
                             factory = factory,
@@ -56,6 +63,8 @@ class MainActivity : ComponentActivity() {
                             onSetDynamicColor = { scope.launch { settingsRepository.setDynamicColor(it) } },
                             onSetEmojiSet = { scope.launch { settingsRepository.setEmojiSet(it) } },
                             onSetEmojiIntensity = { scope.launch { settingsRepository.setEmojiIntensity(it) } },
+                            onSetLongLabel = { type, value -> scope.launch { settingsRepository.setLongLabel(type, value) } },
+                            onSetShortLabel = { type, value -> scope.launch { settingsRepository.setShortLabel(type, value) } },
                         )
                     }
                 }

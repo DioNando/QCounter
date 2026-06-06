@@ -51,6 +51,18 @@
     <string name="settings_dynamic_color">Couleurs dynamiques</string>
     <string name="settings_dynamic_color_desc">Material You : adapte le thème au fond d\'écran</string>
     <string name="settings_palette">Couleurs des indicateurs</string>
+    <string name="settings_labels">Libellés des boutons</string>
+    <string name="settings_labels_hint">Personnalisez le texte des 3 boutons. Laissez vide pour le libellé par défaut.</string>
+    <string name="label_field_long">Libellé long</string>
+    <string name="label_field_short">Libellé court</string>
+    <string name="settings_data">Données</string>
+    <string name="settings_export">Exporter</string>
+    <string name="settings_import">Importer</string>
+    <string name="settings_import_note">L\'import fusionne les données : il n\'écrase rien et ignore les doublons.</string>
+    <string name="export_success">Données exportées</string>
+    <string name="export_error">Échec de l\'export</string>
+    <string name="import_success">%1$d interaction(s) importée(s)</string>
+    <string name="import_error">Fichier illisible ou format invalide</string>
     <string name="settings_home_chart">Graphique d\'accueil</string>
     <string name="chart_waffle">Pictogramme</string>
     <string name="chart_donut">Anneau</string>
@@ -81,6 +93,15 @@
     <!-- Tuile d'accès rapide (accueil) -->
     <string name="tile_history">Historique</string>
     <string name="tile_charts">Graphiques</string>
+
+    <!-- Widget, raccourcis et tuile Quick Settings -->
+    <string name="widget_description">Compter une réponse sans ouvrir l\'app.</string>
+    <string name="widget_description_row">QCounter compact, sur une seule ligne.</string>
+    <string name="widget_description_buttons">QCounter 2×1 : total + Directe et Question.</string>
+    <string name="widget_description_compact">QCounter 1×1 : compter une « Question » d\'un tap.</string>
+    <string name="shortcut_recorded">Ajouté : %1$s</string>
+    <string name="tile_qs_label">QCounter · Question</string>
+    <string name="tile_qs_subtitle">%1$d interactions</string>
 
     <!-- Page Graphiques / Heatmap -->
     <string name="charts_title">Graphiques</string>

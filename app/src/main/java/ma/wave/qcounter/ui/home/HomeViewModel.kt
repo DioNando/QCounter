@@ -1,7 +1,10 @@
 package ma.wave.qcounter.ui.home
 
+import android.content.ContentResolver
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -9,6 +12,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import ma.wave.qcounter.data.io.InteractionTransfer
 import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.InteractionStats
 import ma.wave.qcounter.data.model.StreakStats
@@ -61,5 +66,36 @@ class HomeViewModel(
 
     fun reset() {
         viewModelScope.launch { repository.reset() }
+    }
+
+    /** Exporte tout l'historique en JSON vers [uri]. [onResult] reçoit true si succès. */
+    fun exportTo(resolver: ContentResolver, uri: Uri, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val success = runCatching {
+                val json = InteractionTransfer.encode(repository.exportAll())
+                withContext(Dispatchers.IO) {
+                    resolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
+                        ?: error("flux de sortie indisponible")
+                }
+            }.isSuccess
+            onResult(success)
+        }
+    }
+
+    /**
+     * Importe depuis [uri] en fusionnant (sans écraser ni dupliquer).
+     * [onResult] reçoit le nombre ajouté, ou null en cas d'erreur de lecture/format.
+     */
+    fun importFrom(resolver: ContentResolver, uri: Uri, onResult: (Int?) -> Unit) {
+        viewModelScope.launch {
+            val added = runCatching {
+                val text = withContext(Dispatchers.IO) {
+                    resolver.openInputStream(uri)?.use { it.readBytes().decodeToString() }
+                        ?: error("flux d'entrée indisponible")
+                }
+                repository.importMerging(InteractionTransfer.decode(text))
+            }.getOrNull()
+            onResult(added)
+        }
     }
 }
