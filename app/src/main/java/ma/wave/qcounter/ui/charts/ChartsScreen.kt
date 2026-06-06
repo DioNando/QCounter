@@ -29,6 +29,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ma.wave.qcounter.R
 import ma.wave.qcounter.ui.components.Heatmap
 import ma.wave.qcounter.ui.components.HeatmapLegend
+import ma.wave.qcounter.ui.components.HourlyBarChart
+import ma.wave.qcounter.ui.components.WeekdayBarChart
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,6 +101,36 @@ fun ChartsScreen(
                     }
                 }
             }
+
+            if (heatmap.total > 0) {
+                ChartCard(title = stringResource(R.string.weekday_chart_title)) {
+                    WeekdayBarChart(perDay = heatmap.perDay)
+                }
+                ChartCard(title = stringResource(R.string.hourly_chart_title)) {
+                    HourlyBarChart(perHour = heatmap.perHour)
+                }
+            }
+        }
+    }
+}
+
+/** Carte titrée réutilisable pour un graphique de la page. */
+@Composable
+private fun ChartCard(title: String, content: @Composable () -> Unit) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            content()
         }
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
@@ -39,14 +40,11 @@ import ma.wave.qcounter.data.model.InteractionStats
 /** Clé d'argument transportant le type de réponse à enregistrer depuis le widget. */
 val RecordTypeKey = ActionParameters.Key<String>("qc_record_type")
 
-// Couleurs de marque (palette « Ciel ») pour les boutons du widget.
+// Couleurs de marque (palette « Ciel ») pour les boutons d'action du widget.
+// Le fond et le texte, eux, suivent Material You via GlanceTheme.
 private val DirectColor = Color(0xFF0288D1)
 private val QuestionColor = Color(0xFFE53935)
 private val UnknownColor = Color(0xFF64748B)
-
-// Couleurs du fond/texte du widget (fixes : un widget ne suit pas le thème de l'app).
-private val WidgetBackground = Color(0xFFFFFBFE)
-private val OnWidget = Color(0xFF1C1B1F)
 
 /** Widget d'écran d'accueil : total + 3 boutons pour compter sans ouvrir l'app. */
 class QCounterWidget : GlanceAppWidget() {
@@ -55,7 +53,7 @@ class QCounterWidget : GlanceAppWidget() {
         val repository = (context.applicationContext as QCounterApp).repository
         val stats = repository.stats.first()
         provideContent {
-            WidgetContent(stats)
+            GlanceTheme { WidgetContent(stats) }
         }
     }
 }
@@ -65,7 +63,7 @@ private fun WidgetContent(stats: InteractionStats) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(WidgetBackground)
+            .background(GlanceTheme.colors.widgetBackground)
             .cornerRadius(16.dp)
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -73,14 +71,14 @@ private fun WidgetContent(stats: InteractionStats) {
         Text(
             text = "QCounter",
             style = TextStyle(
-                color = ColorProvider(DirectColor),
+                color = GlanceTheme.colors.primary,
                 fontWeight = FontWeight.Bold,
             ),
         )
         Text(
             text = "${stats.totalInteractions}",
             style = TextStyle(
-                color = ColorProvider(OnWidget),
+                color = GlanceTheme.colors.onSurface,
                 fontWeight = FontWeight.Bold,
                 fontSize = 28.sp,
             ),
@@ -133,7 +131,7 @@ class QCounterRowWidget : GlanceAppWidget() {
         val repository = (context.applicationContext as QCounterApp).repository
         val stats = repository.stats.first()
         provideContent {
-            WidgetRowContent(stats)
+            GlanceTheme { WidgetRowContent(stats) }
         }
     }
 }
@@ -143,7 +141,7 @@ private fun WidgetRowContent(stats: InteractionStats) {
     Row(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(WidgetBackground)
+            .background(GlanceTheme.colors.widgetBackground)
             .cornerRadius(16.dp)
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -151,7 +149,7 @@ private fun WidgetRowContent(stats: InteractionStats) {
         Text(
             text = "${stats.totalInteractions}",
             style = TextStyle(
-                color = ColorProvider(OnWidget),
+                color = GlanceTheme.colors.onSurface,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
             ),
@@ -171,7 +169,7 @@ class QCounterCompactWidget : GlanceAppWidget() {
         val repository = (context.applicationContext as QCounterApp).repository
         val stats = repository.stats.first()
         provideContent {
-            WidgetCompactContent(stats)
+            GlanceTheme { WidgetCompactContent(stats) }
         }
     }
 }
@@ -181,7 +179,7 @@ private fun WidgetCompactContent(stats: InteractionStats) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(QuestionColor)
+            .background(GlanceTheme.colors.primaryContainer)
             .cornerRadius(16.dp)
             .clickable(
                 actionRunCallback<RecordActionCallback>(
@@ -195,14 +193,14 @@ private fun WidgetCompactContent(stats: InteractionStats) {
         Text(
             text = "${stats.questionAnswers}",
             style = TextStyle(
-                color = ColorProvider(Color.White),
+                color = GlanceTheme.colors.onPrimaryContainer,
                 fontWeight = FontWeight.Bold,
                 fontSize = 26.sp,
             ),
         )
         Text(
             text = "Q",
-            style = TextStyle(color = ColorProvider(Color.White)),
+            style = TextStyle(color = GlanceTheme.colors.onPrimaryContainer),
         )
     }
 }
@@ -213,7 +211,7 @@ class QCounterButtonsWidget : GlanceAppWidget() {
         val repository = (context.applicationContext as QCounterApp).repository
         val stats = repository.stats.first()
         provideContent {
-            WidgetButtonsContent(stats)
+            GlanceTheme { WidgetButtonsContent(stats) }
         }
     }
 }
@@ -223,7 +221,7 @@ private fun WidgetButtonsContent(stats: InteractionStats) {
     Row(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(WidgetBackground)
+            .background(GlanceTheme.colors.widgetBackground)
             .cornerRadius(16.dp)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -231,7 +229,7 @@ private fun WidgetButtonsContent(stats: InteractionStats) {
         Text(
             text = "${stats.totalInteractions}",
             style = TextStyle(
-                color = ColorProvider(OnWidget),
+                color = GlanceTheme.colors.onSurface,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
             ),

@@ -109,6 +109,8 @@
     <string name="charts_empty">Pas encore de données à visualiser. Enregistrez quelques interactions.</string>
     <string name="heatmap_title">Activité par heure et par jour</string>
     <string name="heatmap_subtitle">Plus une case est foncée, plus vous avez enregistré d\'interactions sur ce créneau.</string>
+    <string name="weekday_chart_title">Activité par jour de la semaine</string>
+    <string name="hourly_chart_title">Activité par heure</string>
     <string-array name="weekday_initials">
         <item>L</item>
         <item>M</item>

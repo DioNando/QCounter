@@ -47,12 +47,13 @@ val EmojiSets: List<EmojiSet> = listOf(
         unknown = listOf("🐢", "🐌", "🦥"),
     ),
     EmojiSet(
+        // Glyphes volontairement classiques (Unicode 6.x) pour un rendu fiable partout.
         name = "Météo",
         neutral = "⚪",
-        tie = "☁️",
-        direct = listOf("🌤️", "☀️", "🌟"),
-        question = listOf("🌫️", "🌀", "⚡"),
-        unknown = listOf("🌧️", "⛈️", "🌪️"),
+        tie = "🌈",
+        direct = listOf("⛅", "☀️", "🌟"),
+        question = listOf("☁️", "🌀", "⚡"),
+        unknown = listOf("❄️", "☔", "🌊"),
     ),
 )
 

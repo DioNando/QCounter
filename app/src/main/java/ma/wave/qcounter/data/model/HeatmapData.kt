@@ -14,6 +14,12 @@ data class HeatmapData(
     val maxCount: Int = 0,
     val total: Int = 0,
 ) {
+    /** Total d'interactions par jour de la semaine (index 0 = lundi … 6 = dimanche). */
+    val perDay: List<Int> get() = cells.map { it.sum() }
+
+    /** Total d'interactions par heure de la journée (index 0 = 0 h … 23 = 23 h). */
+    val perHour: List<Int> get() = (0 until 24).map { hour -> cells.sumOf { it[hour] } }
+
     companion object {
         fun from(timestamps: List<Long>): HeatmapData {
             if (timestamps.isEmpty()) return HeatmapData()
