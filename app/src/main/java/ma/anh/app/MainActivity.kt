@@ -58,7 +58,7 @@ class MainActivity : FragmentActivity() {
                     LocalAnswerLabels provides answerLabels,
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        // Rien tant que les réglages ne sont pas chargés (cf. ci-dessus).
+                        // Rien tant que les réglages ne sont pas chargés (évite tout flash de l'accueil).
                         if (loadedSettings != null) {
                             QCounterNavHost(
                             factory = factory,
