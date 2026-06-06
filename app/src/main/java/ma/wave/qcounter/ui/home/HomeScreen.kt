@@ -84,6 +84,7 @@ import ma.wave.qcounter.ui.components.EmojiSet
 import ma.wave.qcounter.ui.components.StreakCard
 import ma.wave.qcounter.ui.components.answerTypeShortLabel
 import ma.wave.qcounter.ui.components.answerTypeVisual
+import ma.wave.qcounter.ui.components.clarityEmoji
 import ma.wave.qcounter.ui.components.emojiSetOf
 import ma.wave.qcounter.ui.components.moodEmoji
 import ma.wave.qcounter.ui.util.ShakeToAction
@@ -262,7 +263,14 @@ fun HomeScreen(
                 modifier = Modifier.padding(top = 8.dp),
             )
             if (stats.totalInteractions > 0) {
-                ClarityScoreCard(stats = stats)
+                ClarityScoreCard(
+                    stats = stats,
+                    emoji = if (settings.showEmoji) {
+                        clarityEmoji(stats.clarityBand, emojiSetOf(settings.emojiSetId))
+                    } else {
+                        null
+                    },
+                )
                 StreakCard(streaks = streaks)
             }
             Row(

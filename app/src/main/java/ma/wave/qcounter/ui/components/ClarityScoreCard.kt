@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ma.wave.qcounter.R
 import ma.wave.qcounter.data.model.ClarityBand
 import ma.wave.qcounter.data.model.InteractionStats
@@ -62,7 +63,11 @@ private fun bandInterpretation(band: ClarityBand): String = stringResource(
 
 /** Carte « Indice de Clarté » : score synthétique /100, jauge colorée et interprétation. */
 @Composable
-fun ClarityScoreCard(stats: InteractionStats, modifier: Modifier = Modifier) {
+fun ClarityScoreCard(
+    stats: InteractionStats,
+    modifier: Modifier = Modifier,
+    emoji: String? = null,
+) {
     val band = stats.clarityBand
     val color by animateColorAsState(bandColor(band), tween(450), label = "clarity-color")
     val progress by animateFloatAsState(
@@ -88,10 +93,18 @@ fun ClarityScoreCard(stats: InteractionStats, modifier: Modifier = Modifier) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = stringResource(R.string.clarity_title),
-                    style = MaterialTheme.typography.titleMedium,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (emoji != null) {
+                        Text(text = emoji, fontSize = 24.sp)
+                    }
+                    Text(
+                        text = stringResource(R.string.clarity_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = stats.clarityScore.toString(),

@@ -1,5 +1,6 @@
 package ma.wave.qcounter.ui.components
 
+import ma.wave.qcounter.data.model.ClarityBand
 import ma.wave.qcounter.data.model.EmojiIntensity
 import ma.wave.qcounter.data.model.InteractionStats
 
@@ -59,6 +60,19 @@ val EmojiSets: List<EmojiSet> = listOf(
 
 /** Jeu d'emojis correspondant à l'index sélectionné, avec repli sur le premier. */
 fun emojiSetOf(id: Int): EmojiSet = EmojiSets.getOrElse(id) { EmojiSets[0] }
+
+/**
+ * Emoji illustrant l'indice de clarté, dans le thème du jeu choisi : plus c'est clair, plus
+ * on tend vers les expressions « Directe » ; plus c'est évasif, vers les « Question » ; le
+ * palier mitigé reprend l'emoji d'égalité.
+ */
+fun clarityEmoji(band: ClarityBand, set: EmojiSet): String = when (band) {
+    ClarityBand.VERY_CLEAR -> set.direct.last()
+    ClarityBand.CLEAR -> set.direct[1]
+    ClarityBand.MIXED -> set.tie
+    ClarityBand.EVASIVE -> set.question[1]
+    ClarityBand.VERY_EVASIVE -> set.question.last()
+}
 
 /**
  * Emoji « d'humeur » reflétant le comportement dominant ET son intensité, selon le jeu
