@@ -15,11 +15,22 @@ data class TypeCount(
 @Dao
 interface InteractionDao {
 
+    /** Retourne le rowId inséré, utilisé pour l'annulation ciblée. */
     @Insert
-    suspend fun insert(interaction: InteractionEntity)
+    suspend fun insert(interaction: InteractionEntity): Long
+
+    /** Réinsère des éléments (en conservant leurs id) pour annuler une suppression. */
+    @Insert
+    suspend fun insertAll(interactions: List<InteractionEntity>)
 
     @Query("DELETE FROM interactions")
     suspend fun clear()
+
+    @Query("DELETE FROM interactions WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
+    @Query("DELETE FROM interactions WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>)
 
     @Query("SELECT * FROM interactions ORDER BY timestamp DESC")
     fun observeAll(): Flow<List<InteractionEntity>>

@@ -1,6 +1,9 @@
 package ma.wave.qcounter.ui.history
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +15,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Inbox
+import androidx.compose.material.icons.rounded.SelectAll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,9 +30,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,32 +64,88 @@ fun HistoryScreen(
     onBack: () -> Unit,
 ) {
     val history by viewModel.history.collectAsStateWithLifecycle()
+    val selectedIds by viewModel.selectedIds.collectAsStateWithLifecycle()
+    val inSelection = selectedIds.isNotEmpty()
+
     var showResetDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val undoLabel = stringResource(R.string.action_undo)
+    val deletedTemplate = stringResource(R.string.snackbar_deleted)
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val result = snackbarHostState.showSnackbar(
+                message = deletedTemplate.format(event.items.size),
+                actionLabel = undoLabel,
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.undoDelete(event.items)
+            }
+        }
+    }
+
+    // En mode sélection, le bouton retour système quitte d'abord la sélection.
+    BackHandler(enabled = inSelection) { viewModel.clearSelection() }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.history_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = stringResource(R.string.cancel),
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { showResetDialog = true },
-                        enabled = history.isNotEmpty(),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.DeleteSweep,
-                            contentDescription = stringResource(R.string.action_reset),
-                        )
-                    }
-                },
-            )
+            if (inSelection) {
+                TopAppBar(
+                    title = {
+                        Text(stringResource(R.string.selection_count, selectedIds.size))
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { viewModel.clearSelection() }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = stringResource(R.string.cd_close_selection),
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { viewModel.selectAll() }) {
+                            Icon(
+                                imageVector = Icons.Rounded.SelectAll,
+                                contentDescription = stringResource(R.string.cd_select_all),
+                            )
+                        }
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Delete,
+                                contentDescription = stringResource(R.string.delete_selected),
+                            )
+                        }
+                    },
+                )
+            } else {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.history_title)) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                contentDescription = stringResource(R.string.cancel),
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = { showResetDialog = true },
+                            enabled = history.isNotEmpty(),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.DeleteSweep,
+                                contentDescription = stringResource(R.string.action_reset),
+                            )
+                        }
+                    },
+                )
+            }
         },
     ) { innerPadding ->
         if (history.isEmpty()) {
@@ -91,7 +161,15 @@ fun HistoryScreen(
                     .padding(innerPadding),
             ) {
                 items(history, key = { it.id }) { interaction ->
-                    InteractionRow(interaction)
+                    InteractionRow(
+                        interaction = interaction,
+                        selected = selectedIds.contains(interaction.id),
+                        inSelection = inSelection,
+                        onClick = {
+                            if (inSelection) viewModel.toggleSelection(interaction.id)
+                        },
+                        onLongClick = { viewModel.toggleSelection(interaction.id) },
+                    )
                     HorizontalDivider()
                 }
             }
@@ -107,12 +185,46 @@ fun HistoryScreen(
             onDismiss = { showResetDialog = false },
         )
     }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.delete_dialog_title)) },
+            text = { Text(stringResource(R.string.delete_dialog_message, selectedIds.size)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteSelected()
+                    showDeleteDialog = false
+                }) { Text(stringResource(R.string.confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun InteractionRow(interaction: InteractionEntity) {
+private fun InteractionRow(
+    interaction: InteractionEntity,
+    selected: Boolean,
+    inSelection: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
     val visual = answerTypeVisual(interaction.type)
+    val container =
+        if (selected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surface
+
     ListItem(
+        modifier = Modifier.combinedClickable(
+            onClick = onClick,
+            onLongClick = onLongClick,
+        ),
         leadingContent = {
             Box(
                 modifier = Modifier
@@ -130,9 +242,10 @@ private fun InteractionRow(interaction: InteractionEntity) {
         },
         headlineContent = { Text(visual.label) },
         supportingContent = { Text(formatTimestamp(interaction.timestamp)) },
-        colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
+        trailingContent = if (inSelection) {
+            { Checkbox(checked = selected, onCheckedChange = { onClick() }) }
+        } else null,
+        colors = ListItemDefaults.colors(containerColor = container),
     )
 }
 

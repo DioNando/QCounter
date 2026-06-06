@@ -13,9 +13,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ma.wave.qcounter.R
 import ma.wave.qcounter.data.model.InteractionStats
-import ma.wave.qcounter.ui.theme.DirectGreen
-import ma.wave.qcounter.ui.theme.QuestionIndigo
-import ma.wave.qcounter.ui.theme.UnknownAmber
+import ma.wave.qcounter.ui.theme.AccentDirect
+import ma.wave.qcounter.ui.theme.AccentQuestion
+import ma.wave.qcounter.ui.theme.AccentUnknown
 
 /** Carte des KPI : chaque indicateur est une barre de progression animée. */
 @Composable
@@ -37,17 +37,17 @@ fun KpiDashboard(
             StatBar(
                 label = stringResource(R.string.kpi_tel),
                 percent = stats.questionRatio,
-                accent = QuestionIndigo,
+                accent = AccentQuestion,
             )
             StatBar(
                 label = stringResource(R.string.kpi_rc),
                 percent = stats.directRatio,
-                accent = DirectGreen,
+                accent = AccentDirect,
             )
             StatBar(
                 label = stringResource(R.string.kpi_unknown),
                 percent = stats.unknownRatio,
-                accent = UnknownAmber,
+                accent = AccentUnknown,
             )
         }
     }

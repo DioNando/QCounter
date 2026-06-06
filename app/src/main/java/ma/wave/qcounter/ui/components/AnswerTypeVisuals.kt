@@ -10,9 +10,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import ma.wave.qcounter.R
 import ma.wave.qcounter.data.model.AnswerType
-import ma.wave.qcounter.ui.theme.DirectGreen
-import ma.wave.qcounter.ui.theme.QuestionIndigo
-import ma.wave.qcounter.ui.theme.UnknownAmber
+import ma.wave.qcounter.ui.theme.AccentDirect
+import ma.wave.qcounter.ui.theme.AccentQuestion
+import ma.wave.qcounter.ui.theme.AccentUnknown
 
 /** Métadonnées visuelles (libellé, couleur d'accent, icône) propres à chaque type de réponse. */
 data class AnswerTypeVisual(
@@ -25,19 +25,19 @@ data class AnswerTypeVisual(
 fun answerTypeVisual(type: AnswerType): AnswerTypeVisual = when (type) {
     AnswerType.DIRECT -> AnswerTypeVisual(
         label = stringResource(R.string.action_direct),
-        accent = DirectGreen,
+        accent = AccentDirect,
         icon = Icons.Rounded.CheckCircle,
     )
 
     AnswerType.QUESTION -> AnswerTypeVisual(
         label = stringResource(R.string.action_question),
-        accent = QuestionIndigo,
+        accent = AccentQuestion,
         icon = Icons.Rounded.QuestionAnswer,
     )
 
     AnswerType.UNKNOWN -> AnswerTypeVisual(
         label = stringResource(R.string.action_unknown),
-        accent = UnknownAmber,
+        accent = AccentUnknown,
         icon = Icons.Rounded.HelpOutline,
     )
 }

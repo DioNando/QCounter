@@ -2,6 +2,9 @@ package ma.wave.qcounter.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -9,6 +12,9 @@ import kotlinx.coroutines.launch
 import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.InteractionStats
 import ma.wave.qcounter.data.repository.InteractionRepository
+
+/** Événement émis après un enregistrement, pour proposer l'annulation. */
+data class RecordedEvent(val id: Long, val type: AnswerType)
 
 class HomeViewModel(
     private val repository: InteractionRepository,
@@ -21,8 +27,23 @@ class HomeViewModel(
         initialValue = InteractionStats(),
     )
 
+    // On ne garde que le dernier événement : un appui rapide remplace le snackbar précédent.
+    private val _events = MutableSharedFlow<RecordedEvent>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    val events: SharedFlow<RecordedEvent> = _events
+
     fun record(type: AnswerType) {
-        viewModelScope.launch { repository.record(type) }
+        viewModelScope.launch {
+            val id = repository.record(type)
+            _events.emit(RecordedEvent(id, type))
+        }
+    }
+
+    fun undo(id: Long) {
+        viewModelScope.launch { repository.deleteById(id) }
     }
 
     fun reset() {

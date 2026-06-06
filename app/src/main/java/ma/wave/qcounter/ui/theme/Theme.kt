@@ -1,47 +1,41 @@
 package ma.wave.qcounter.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-
-private val DarkColors = darkColorScheme(
-    primary = Indigo80,
-    secondary = IndigoGrey80,
-    tertiary = Teal80,
-)
+import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
-    primary = Indigo40,
-    secondary = IndigoGrey40,
-    tertiary = Teal40,
+    primary = SkyBlue,
+    onPrimary = Color.White,
+    primaryContainer = SkyContainerLight,
+    onPrimaryContainer = OnSkyContainerLight,
+    secondary = AccentUnknown,
+    tertiary = AccentQuestion,
 )
 
+private val DarkColors = darkColorScheme(
+    primary = SkyBlue80,
+    onPrimary = Color(0xFF00344C),
+    primaryContainer = SkyContainerDark,
+    onPrimaryContainer = OnSkyContainerDark,
+    secondary = Color(0xFFB7C2D0),
+    tertiary = Color(0xFFFF8A80),
+)
+
+/**
+ * Thème de marque QCounter. Les couleurs dynamiques (Material You) sont
+ * désactivées par défaut afin de garantir la palette bleu ciel / rouge / gris.
+ */
 @Composable
 fun QCounterTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Couleurs dynamiques (Material You) disponibles à partir d'Android 12.
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context)
-            else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColors
-        else -> LightColors
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = if (darkTheme) DarkColors else LightColors,
         typography = Typography,
         content = content,
     )

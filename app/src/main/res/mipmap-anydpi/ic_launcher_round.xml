@@ -5,7 +5,7 @@
     android:viewportHeight="108">
     <!-- Fond circulaire -->
     <path
-        android:fillColor="#4A55C7"
+        android:fillColor="#0288D1"
         android:pathData="M54,54 m-54,0 a54,54 0 1,0 108,0 a54,54 0 1,0 -108,0" />
     <!-- Anneau du "Q" -->
     <path

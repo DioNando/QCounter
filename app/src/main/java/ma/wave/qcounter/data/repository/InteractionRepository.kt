@@ -29,8 +29,19 @@ class InteractionRepository(
     /** Historique complet, le plus récent en tête. */
     val history: Flow<List<InteractionEntity>> = dao.observeAll()
 
-    suspend fun record(type: AnswerType) {
+    /** Enregistre une interaction et retourne son id (pour pouvoir l'annuler). */
+    suspend fun record(type: AnswerType): Long =
         dao.insert(InteractionEntity(type = type, timestamp = now()))
+
+    suspend fun deleteById(id: Long) = dao.deleteById(id)
+
+    suspend fun deleteByIds(ids: List<Long>) {
+        if (ids.isNotEmpty()) dao.deleteByIds(ids)
+    }
+
+    /** Restaure des éléments précédemment supprimés (annulation). */
+    suspend fun restore(items: List<InteractionEntity>) {
+        if (items.isNotEmpty()) dao.insertAll(items)
     }
 
     suspend fun reset() {

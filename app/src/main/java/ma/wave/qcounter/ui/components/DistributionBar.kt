@@ -23,9 +23,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ma.wave.qcounter.data.model.InteractionStats
-import ma.wave.qcounter.ui.theme.DirectGreen
-import ma.wave.qcounter.ui.theme.QuestionIndigo
-import ma.wave.qcounter.ui.theme.UnknownAmber
+import ma.wave.qcounter.ui.theme.AccentDirect
+import ma.wave.qcounter.ui.theme.AccentQuestion
+import ma.wave.qcounter.ui.theme.AccentUnknown
 
 /**
  * Barre horizontale segmentée montrant la proportion de chaque type de réponse.
@@ -67,7 +67,7 @@ fun DistributionBar(
                         Modifier
                             .weight(directFraction)
                             .fillMaxHeight()
-                            .background(DirectGreen),
+                            .background(AccentDirect),
                     )
                 }
                 if (questionFraction > 0f) {
@@ -75,7 +75,7 @@ fun DistributionBar(
                         Modifier
                             .weight(questionFraction)
                             .fillMaxHeight()
-                            .background(QuestionIndigo),
+                            .background(AccentQuestion),
                     )
                 }
                 if (unknownFraction > 0f) {
@@ -83,7 +83,7 @@ fun DistributionBar(
                         Modifier
                             .weight(unknownFraction)
                             .fillMaxHeight()
-                            .background(UnknownAmber),
+                            .background(AccentUnknown),
                     )
                 }
             }

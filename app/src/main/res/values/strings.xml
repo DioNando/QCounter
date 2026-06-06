@@ -8,16 +8,39 @@
 
     <!-- En-tête / héro -->
     <string name="hero_volume_label">Volume Global</string>
+    <string name="hero_center_unit">interactions</string>
     <string name="hero_distribution">Répartition des réponses</string>
     <string name="hero_empty_hint">Touchez un bouton ci-dessous pour commencer le suivi 👇</string>
+
+    <!-- KPI compacts affichés dans le héro -->
+    <string name="kpi_rc_short">RC · Clarté</string>
+    <string name="kpi_tel_short">TEL · Esquive</string>
+    <string name="kpi_unknown_short">Indécision</string>
 
     <!-- Libellés courts pour la légende de la barre de répartition -->
     <string name="legend_direct">Directe</string>
     <string name="legend_question">Question</string>
     <string name="legend_unknown">Esquive</string>
 
+    <!-- Panneau d'action (en bas) -->
+    <string name="action_panel_title">Enregistrer une réponse</string>
+    <string name="logo_content_desc">Logo QCounter</string>
+
+    <!-- Annulation -->
+    <string name="snackbar_recorded">Ajouté : %1$s</string>
+    <string name="action_undo">Annuler</string>
+
+    <!-- Sélection / suppression dans l'historique -->
+    <string name="selection_count">%1$d sélectionné(s)</string>
+    <string name="cd_close_selection">Quitter la sélection</string>
+    <string name="cd_select_all">Tout sélectionner</string>
+    <string name="delete_selected">Supprimer la sélection</string>
+    <string name="delete_dialog_title">Supprimer les éléments ?</string>
+    <string name="delete_dialog_message">%1$d élément(s) seront définitivement supprimés.</string>
+    <string name="snackbar_deleted">%1$d élément(s) supprimé(s)</string>
+
     <!-- KPI -->
-    <string name="kpi_title">Indicateurs (temps réel)</string>
+    <string name="kpi_title">Indicateurs</string>
     <string name="kpi_total">Volume Global</string>
     <string name="kpi_tel">Taux d\'Esquive Linéaire (TEL)</string>
     <string name="kpi_rc">Ratio de Clarté (RC)</string>
