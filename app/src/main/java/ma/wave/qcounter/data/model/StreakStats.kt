@@ -44,5 +44,18 @@ data class StreakStats(
             }
             return StreakStats(currentType, currentLength, bestType, bestLength)
         }
+
+        /** Plus longue série consécutive **par type** présente dans l'historique. */
+        fun bestByType(history: List<AnswerType>): Map<AnswerType, Int> {
+            val best = LinkedHashMap<AnswerType, Int>()
+            var runType: AnswerType? = null
+            var runLength = 0
+            for (type in history) {
+                runLength = if (type == runType) runLength + 1 else 1
+                runType = type
+                if (runLength > (best[type] ?: 0)) best[type] = runLength
+            }
+            return best
+        }
     }
 }

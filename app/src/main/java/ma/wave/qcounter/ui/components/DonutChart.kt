@@ -37,7 +37,7 @@ fun DonutChart(
     content: @Composable () -> Unit = {},
 ) {
     val palette = LocalAccentPalette.current
-    val total = stats.totalInteractions.coerceAtLeast(1)
+    val total = stats.coreTotal.coerceAtLeast(1)
 
     // Joue l'animation de remplissage depuis 0 au premier affichage.
     var started by remember { mutableStateOf(false) }
@@ -61,7 +61,7 @@ fun DonutChart(
     )
 
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
-    val hasData = stats.totalInteractions > 0
+    val hasData = stats.coreTotal > 0
 
     Box(
         modifier = modifier.size(diameter),

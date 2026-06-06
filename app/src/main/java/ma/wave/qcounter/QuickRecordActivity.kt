@@ -31,6 +31,9 @@ class QuickRecordActivity : Activity() {
                     AnswerType.DIRECT -> R.string.legend_direct
                     AnswerType.QUESTION -> R.string.legend_question
                     AnswerType.UNKNOWN -> R.string.legend_unknown
+                    AnswerType.CUSTOM -> R.string.legend_custom
+                    AnswerType.OUI -> R.string.action_yes
+                    AnswerType.NON -> R.string.action_no
                 },
             )
             Toast.makeText(this, getString(R.string.shortcut_recorded, label), Toast.LENGTH_SHORT).show()

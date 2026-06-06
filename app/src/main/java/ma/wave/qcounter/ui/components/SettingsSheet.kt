@@ -32,6 +32,8 @@ import androidx.compose.material.icons.rounded.DonutLarge
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Mood
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.StarOutline
 import androidx.compose.material.icons.rounded.TrackChanges
 import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.runtime.Composable
@@ -66,6 +68,7 @@ fun SettingsSheet(
     onSetEmojiIntensity: (EmojiIntensity) -> Unit,
     onSetLongLabel: (AnswerType, String) -> Unit,
     onSetShortLabel: (AnswerType, String) -> Unit,
+    onSetCustomEnabled: (Boolean) -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
     onDismiss: () -> Unit,
@@ -79,10 +82,21 @@ fun SettingsSheet(
                 .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(
-                text = stringResource(R.string.settings_title),
-                style = MaterialTheme.typography.titleLarge,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Icon(
+                    imageVector = Icons.Rounded.Settings,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
 
             // Toggle emoji
             SettingToggleRow(
@@ -238,6 +252,15 @@ fun SettingsSheet(
                 }
             }
 
+            // 4ᵉ catégorie optionnelle (neutre dans les KPI).
+            SettingToggleRow(
+                icon = Icons.Rounded.StarOutline,
+                label = stringResource(R.string.settings_custom_category),
+                supportingText = stringResource(R.string.settings_custom_category_desc),
+                checked = settings.customEnabled,
+                onCheckedChange = onSetCustomEnabled,
+            )
+
             Text(
                 text = stringResource(R.string.settings_labels),
                 style = MaterialTheme.typography.titleMedium,
@@ -274,6 +297,17 @@ fun SettingsSheet(
                 onSetLongLabel = onSetLongLabel,
                 onSetShortLabel = onSetShortLabel,
             )
+            if (settings.customEnabled) {
+                LabelEditor(
+                    type = AnswerType.CUSTOM,
+                    longCurrent = settings.labels.custom,
+                    shortCurrent = settings.labels.customShort,
+                    longDefault = stringResource(R.string.action_custom),
+                    shortDefault = stringResource(R.string.legend_custom),
+                    onSetLongLabel = onSetLongLabel,
+                    onSetShortLabel = onSetShortLabel,
+                )
+            }
 
             Text(
                 text = stringResource(R.string.settings_data),

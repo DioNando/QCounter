@@ -7,4 +7,5 @@
     android:resizeMode="none"
     android:widgetCategory="home_screen"
     android:description="@string/widget_description_compact"
+    android:configure="ma.wave.qcounter.ui.widget.CompactWidgetConfigActivity"
     android:initialLayout="@layout/glance_default_loading_layout" />

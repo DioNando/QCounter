@@ -5,6 +5,10 @@
     <string name="action_direct">Réponse Directe</string>
     <string name="action_question">Question par une Question</string>
     <string name="action_unknown">Je ne sais pas</string>
+    <string name="action_custom">Autre</string>
+    <string name="action_yes">Oui</string>
+    <string name="action_no">Non</string>
+    <string name="yesno_title">Ratio Oui / Non</string>
 
     <!-- En-tête / héro -->
     <string name="hero_volume_label">Volume Global</string>
@@ -21,6 +25,7 @@
     <string name="legend_direct">Directe</string>
     <string name="legend_question">Question</string>
     <string name="legend_unknown">Esquive</string>
+    <string name="legend_custom">Autre</string>
 
     <!-- Panneau d'action (en bas) -->
     <string name="action_panel_title">Enregistrer une réponse</string>
@@ -51,6 +56,8 @@
     <string name="settings_dynamic_color">Couleurs dynamiques</string>
     <string name="settings_dynamic_color_desc">Material You : adapte le thème au fond d\'écran</string>
     <string name="settings_palette">Couleurs des indicateurs</string>
+    <string name="settings_custom_category">4ᵉ catégorie</string>
+    <string name="settings_custom_category_desc">Un bouton supplémentaire, neutre dans les indicateurs</string>
     <string name="settings_labels">Libellés des boutons</string>
     <string name="settings_labels_hint">Personnalisez le texte des 3 boutons. Laissez vide pour le libellé par défaut.</string>
     <string name="label_field_long">Libellé long</string>
@@ -98,7 +105,8 @@
     <string name="widget_description">Compter une réponse sans ouvrir l\'app.</string>
     <string name="widget_description_row">Anh compact, sur une seule ligne.</string>
     <string name="widget_description_buttons">Anh 2×1 : total + Directe et Question.</string>
-    <string name="widget_description_compact">Anh 1×1 : compter une « Question » d\'un tap.</string>
+    <string name="widget_description_compact">Anh 1×1 : compter une action d\'un tap (configurable).</string>
+    <string name="widget_config_title">Quelle action enregistrer ?</string>
     <string name="shortcut_recorded">Ajouté : %1$s</string>
     <string name="tile_qs_label">Anh · Question</string>
     <string name="tile_qs_subtitle">%1$d interactions</string>
@@ -109,6 +117,7 @@
     <string name="charts_empty">Pas encore de données à visualiser. Enregistrez quelques interactions.</string>
     <string name="heatmap_title">Activité par heure et par jour</string>
     <string name="heatmap_subtitle">Plus une case est foncée, plus vous avez enregistré d\'interactions sur ce créneau.</string>
+    <string name="records_title">Records de séries</string>
     <string name="weekday_chart_title">Activité par jour de la semaine</string>
     <string name="hourly_chart_title">Activité par heure</string>
     <string-array name="weekday_initials">

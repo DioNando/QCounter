@@ -6,10 +6,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.data.model.HeatmapData
+import ma.wave.qcounter.data.model.StreakStats
 import ma.wave.qcounter.data.repository.InteractionRepository
 
-/** Alimente la page Graphiques : grille d'activité dérivée des horodatages de l'historique. */
+/** Alimente la page Graphiques : heatmap d'activité + meilleures séries par type. */
 class ChartsViewModel(
     repository: InteractionRepository,
 ) : ViewModel() {
@@ -20,5 +22,18 @@ class ChartsViewModel(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = HeatmapData(),
+        )
+
+    /** Plus longue série par type, triée par ordre des types, pour la carte « Records ». */
+    val records: StateFlow<List<Pair<AnswerType, Int>>> = repository.history
+        .map { rows ->
+            StreakStats.bestByType(rows.map { it.type })
+                .toList()
+                .sortedBy { it.first.ordinal }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList(),
         )
 }

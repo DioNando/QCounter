@@ -75,6 +75,18 @@ fun clarityEmoji(band: ClarityBand, set: EmojiSet): String = when (band) {
 }
 
 /**
+ * Emoji du ratio Oui/Non, dans le thème du jeu : majorité de « Oui » → expressions positives
+ * (Directe), majorité de « Non » → expressions « Question », équilibre → emoji d'égalité.
+ */
+fun yesNoEmoji(yesRatio: Double, set: EmojiSet): String = when {
+    yesRatio >= 66 -> set.direct.last()
+    yesRatio >= 55 -> set.direct[1]
+    yesRatio > 45 -> set.tie
+    yesRatio > 34 -> set.question[1]
+    else -> set.question.last()
+}
+
+/**
  * Emoji « d'humeur » reflétant le comportement dominant ET son intensité, selon le jeu
  * choisi et la sensibilité des paliers. Plus la part du type dominant est forte, plus
  * l'expression est marquée — fun à voir évoluer.
@@ -84,7 +96,8 @@ fun moodEmoji(
     set: EmojiSet = EmojiSets[0],
     intensity: EmojiIntensity = EmojiIntensity.NORMAL,
 ): String {
-    val total = stats.totalInteractions
+    // On se base sur le cœur comportemental (la 4ᵉ catégorie est neutre).
+    val total = stats.coreTotal
     if (total == 0) return set.neutral
 
     val d = stats.directAnswers

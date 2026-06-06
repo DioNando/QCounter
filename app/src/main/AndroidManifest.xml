@@ -70,6 +70,16 @@
                 android:resource="@xml/qcounter_widget_buttons_info" />
         </receiver>
 
+        <!-- Écran de configuration du widget 1×1 (choix de l'action). -->
+        <activity
+            android:name=".ui.widget.CompactWidgetConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.QCounter">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Widget — variante 1×1. -->
         <receiver
             android:name=".ui.widget.QCounterCompactWidgetReceiver"

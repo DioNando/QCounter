@@ -13,4 +13,16 @@ enum class AnswerType {
 
     /** Esquive systématique ou indécision ("Je ne sais pas"). */
     UNKNOWN,
+
+    /**
+     * 4ᵉ catégorie optionnelle, définie par l'utilisateur (activable dans les réglages).
+     * Comptée dans le Volume Global mais **neutre** : exclue des KPI, du score et de l'emoji.
+     */
+    CUSTOM,
+
+    /** Dimension « polarité » : réponse positive. Sous-décompte séparé, hors Volume et KPI. */
+    OUI,
+
+    /** Dimension « polarité » : réponse négative. Sous-décompte séparé, hors Volume et KPI. */
+    NON,
 }

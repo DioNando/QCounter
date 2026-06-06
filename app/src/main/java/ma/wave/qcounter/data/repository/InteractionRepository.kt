@@ -21,18 +21,36 @@ class InteractionRepository(
     val stats: Flow<InteractionStats> = dao.observeCounts().map { counts ->
         fun count(type: AnswerType) = counts.firstOrNull { it.type == type }?.count ?: 0
         InteractionStats(
-            directAnswers = count(AnswerType.DIRECT),
+            // Oui/Non sont des réponses directes qualifiées → agrégées dans « Directe ».
+            directAnswers = count(AnswerType.DIRECT) + count(AnswerType.OUI) + count(AnswerType.NON),
             questionAnswers = count(AnswerType.QUESTION),
             unknownAnswers = count(AnswerType.UNKNOWN),
+            customAnswers = count(AnswerType.CUSTOM),
+            yesAnswers = count(AnswerType.OUI),
+            noAnswers = count(AnswerType.NON),
         )
     }
 
     /** Historique complet, le plus récent en tête. */
     val history: Flow<List<InteractionEntity>> = dao.observeAll()
 
-    /** Séries (en cours / record), dérivées réactivement de l'historique. */
+    /**
+     * Séries (en cours / record). La **série en cours** porte sur les types réels (un enchaînement
+     * de Oui/Non s'affiche tel quel) ; le **record** fusionne Oui/Non dans « Directe » (on ne veut
+     * pas de Oui/Non dans la tuile Record).
+     */
     val streaks: Flow<StreakStats> = dao.observeAll().map { rows ->
-        StreakStats.from(rows.map { it.type })
+        val types = rows.map { it.type }
+        val current = StreakStats.from(types)
+        val record = StreakStats.from(
+            types.map { if (it == AnswerType.OUI || it == AnswerType.NON) AnswerType.DIRECT else it },
+        )
+        StreakStats(
+            currentType = current.currentType,
+            currentLength = current.currentLength,
+            bestType = record.bestType,
+            bestLength = record.bestLength,
+        )
     }
 
     /** Enregistre une interaction et retourne son id (pour pouvoir l'annuler). */

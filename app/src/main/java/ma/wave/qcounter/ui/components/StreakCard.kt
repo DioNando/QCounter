@@ -30,11 +30,13 @@ import androidx.compose.ui.unit.dp
 import ma.wave.qcounter.R
 import ma.wave.qcounter.data.model.StreakStats
 
-/** Carte « Séries » : série en cours et record, chacune colorée par le type concerné. */
+/**
+ * Carte « Séries » : série en cours et record, colorées par le type concerné. Comme les séries
+ * portent sur les types réels, une suite de Oui (ou de Non) s'affiche directement (ex. « ×3 Oui »).
+ */
 @Composable
 fun StreakCard(streaks: StreakStats, modifier: Modifier = Modifier) {
     val currentType = streaks.currentType ?: return
-
     val current = answerTypeVisual(currentType)
     val bestType = streaks.bestType
     val best = bestType?.let { answerTypeVisual(it) }
@@ -55,7 +57,6 @@ fun StreakCard(streaks: StreakStats, modifier: Modifier = Modifier) {
                 icon = Icons.Rounded.LocalFireDepartment,
                 title = stringResource(R.string.streak_title),
             )
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),

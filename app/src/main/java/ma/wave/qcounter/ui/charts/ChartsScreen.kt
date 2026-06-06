@@ -1,18 +1,24 @@
 package ma.wave.qcounter.ui.charts
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,13 +33,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ma.wave.qcounter.R
+import ma.wave.qcounter.data.model.AnswerType
 import ma.wave.qcounter.ui.components.CardHeader
+import ma.wave.qcounter.ui.components.answerTypeVisual
 import ma.wave.qcounter.ui.components.Heatmap
 import ma.wave.qcounter.ui.components.HeatmapLegend
 import ma.wave.qcounter.ui.components.HourlyBarChart
@@ -46,6 +56,7 @@ fun ChartsScreen(
     onBack: () -> Unit,
 ) {
     val heatmap by viewModel.heatmap.collectAsStateWithLifecycle()
+    val records by viewModel.records.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -66,14 +77,26 @@ fun ChartsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            if (records.isNotEmpty()) {
+                ChartCard(
+                    icon = Icons.Rounded.EmojiEvents,
+                    title = stringResource(R.string.records_title),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        records.forEach { (type, length) ->
+                            RecordRow(type = type, length = length)
+                        }
+                    }
+                }
+            }
+
             ChartCard(
                 icon = Icons.Rounded.CalendarMonth,
                 title = stringResource(R.string.heatmap_title),
-                modifier = Modifier.padding(top = 8.dp),
             ) {
                 if (heatmap.total == 0) {
                     Text(
@@ -109,6 +132,43 @@ fun ChartsScreen(
                 }
             }
         }
+    }
+}
+
+/** Une ligne « record » : badge d'icône du type + libellé + plus longue série. */
+@Composable
+private fun RecordRow(type: AnswerType, length: Int) {
+    val visual = answerTypeVisual(type)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(visual.accent.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = visual.icon,
+                contentDescription = null,
+                tint = visual.accent,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        Text(
+            text = visual.label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = "×$length",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            color = visual.accent,
+        )
     }
 }
 

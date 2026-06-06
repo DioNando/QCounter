@@ -26,6 +26,7 @@ class SettingsRepository(private val context: Context) {
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val EMOJI_SET = intPreferencesKey("emoji_set")
         val EMOJI_INTENSITY = intPreferencesKey("emoji_intensity")
+        val CUSTOM_ENABLED = booleanPreferencesKey("custom_enabled")
 
         // Libellés personnalisés (longs et courts) par type.
         fun longLabel(type: AnswerType) = stringPreferencesKey("label_long_${type.name}")
@@ -46,10 +47,13 @@ class SettingsRepository(private val context: Context) {
                 direct = prefs[Keys.longLabel(AnswerType.DIRECT)],
                 question = prefs[Keys.longLabel(AnswerType.QUESTION)],
                 unknown = prefs[Keys.longLabel(AnswerType.UNKNOWN)],
+                custom = prefs[Keys.longLabel(AnswerType.CUSTOM)],
                 directShort = prefs[Keys.shortLabel(AnswerType.DIRECT)],
                 questionShort = prefs[Keys.shortLabel(AnswerType.QUESTION)],
                 unknownShort = prefs[Keys.shortLabel(AnswerType.UNKNOWN)],
+                customShort = prefs[Keys.shortLabel(AnswerType.CUSTOM)],
             ),
+            customEnabled = prefs[Keys.CUSTOM_ENABLED] ?: false,
         )
     }
 
@@ -75,6 +79,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setEmojiIntensity(intensity: EmojiIntensity) {
         context.dataStore.edit { it[Keys.EMOJI_INTENSITY] = intensity.ordinal }
+    }
+
+    suspend fun setCustomEnabled(value: Boolean) {
+        context.dataStore.edit { it[Keys.CUSTOM_ENABLED] = value }
     }
 
     /** Définit (ou réinitialise si vide) le libellé long d'un bouton. */

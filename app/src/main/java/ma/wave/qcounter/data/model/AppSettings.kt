@@ -22,9 +22,11 @@ data class AnswerLabels(
     val direct: String? = null,
     val question: String? = null,
     val unknown: String? = null,
+    val custom: String? = null,
     val directShort: String? = null,
     val questionShort: String? = null,
     val unknownShort: String? = null,
+    val customShort: String? = null,
 )
 
 /** Préférences utilisateur persistées. */
@@ -38,6 +40,8 @@ data class AppSettings(
     val emojiSetId: Int = 0,
     /** Sensibilité des paliers d'intensité de l'emoji. */
     val emojiIntensity: EmojiIntensity = EmojiIntensity.NORMAL,
-    /** Libellés personnalisés des 3 boutons (cosmétique). */
+    /** Libellés personnalisés des boutons (cosmétique). */
     val labels: AnswerLabels = AnswerLabels(),
+    /** Active une 4ᵉ catégorie optionnelle (neutre dans les KPI). */
+    val customEnabled: Boolean = false,
 )

@@ -64,7 +64,13 @@ qualitative :
 ### Séries (streaks)
 
 L'app suit la **série en cours** (suite de réponses consécutives du même type, ex. « ×5 Directe »)
-et le **record** (plus longue série jamais atteinte).
+et le **record** (plus longue série jamais atteinte). La page Graphiques détaille le **record par type**.
+
+### Polarité Oui / Non
+
+En plus de la *manière*, on peut noter la *polarité* d'une réponse directe (**Oui** / **Non**). Un
+Oui/Non **compte comme une réponse directe** (Volume, RC, clarté) ; en parallèle, une **carte ratio**
+montre la proportion Oui vs Non. C'est une qualification, pas une catégorie séparée → aucun double comptage.
 
 ---
 
@@ -73,17 +79,20 @@ et le **record** (plus longue série jamais atteinte).
 **Saisie & accueil**
 - **Trois actions de saisie instantanée** (libellés personnalisables) avec compteurs animés, cartes
   colorées et retour haptique ; panneau ancré en bas, accessible au pouce.
+- **Boutons Oui / Non** sous « Réponse Directe » : ce sont des **réponses directes qualifiées**
+  (comptées comme directes dans les KPI), avec une **carte Ratio Oui/Non** dédiée.
+- **4ᵉ catégorie optionnelle** activable dans les réglages (libellé + couleur) — **neutre** dans les KPI.
 - **Visualisation au choix** : **pictogramme waffle**, **anneau (donut)** ou **anneaux d'activité**,
   avec remplissage animé, légende et pourcentages KPI compacts.
-- **Indice de clarté** et **séries** affichés en cartes dédiées.
+- **Indice de clarté** (avec emoji reflétant le score) et **séries** (en cours / record) en cartes dédiées.
 - **Emoji d'humeur** évolutif selon le comportement dominant **et son intensité** : 4 **jeux d'emojis**
   (Classique, Expressif, Animaux, Météo) et 3 niveaux de **sensibilité** (Subtil / Normal / Marqué).
 
 **Historique & graphiques**
-- **Historique horodaté** persistant avec **mode sélection multiple** (appui long → suppression,
-  confirmation et annulation).
-- **Page Graphiques** : **heatmap** d'activité par heure × jour de la semaine, **activité par jour**
-  et **activité par heure** (graphiques en barres).
+- **Historique horodaté** persistant, **paginé** (100 entrées, bouton « Afficher plus »), avec **mode
+  sélection multiple** (appui long → suppression, confirmation et annulation).
+- **Page Graphiques** : **records de séries par type** (plus longue série de chaque type), **heatmap**
+  d'activité par heure × jour de la semaine, **activité par jour** et **activité par heure** (barres).
 - **Réinitialisation** complète depuis l'accueil ou l'historique.
 
 **Annulation & confidentialité**
@@ -94,12 +103,14 @@ et le **record** (plus longue série jamais atteinte).
 
 **Personnalisation**
 - **Couleurs dynamiques Material You** (Android 12+) activables en option.
-- **4 palettes** d'indicateurs : **Lagon** (charte de marque, par défaut) / Ciel / Forêt / Crépuscule.
-- **Libellés des 3 boutons** personnalisables (longs et courts).
+- **5 palettes** d'indicateurs : **Soleil** (marque, par défaut) / Lagon / Ciel / Forêt / Crépuscule.
+- **Libellés des boutons** personnalisables (longs et courts), 4ᵉ catégorie incluse.
 
 **Hors application**
 - **Widget d'écran d'accueil** en **4 variantes** : complet (titre + total + 3 boutons), compact sur une
-  ligne (total + 3 boutons), **2×1** (total + Directe & Question) et **1×1** (bouton Question). Material You.
+  ligne (total + 3 boutons), **2×1** (total + Directe & Question) et **1×1** (bouton Question). **Fond
+  Material You**, boutons aux **couleurs de marque**. La **1×1 est configurable** (action au choix).
+- **Icônes de raccourcis distinctes** par action (bulle colorée : Directe / Question / Esquive).
 - **Raccourcis du lanceur** (appui long sur l'icône) pour enregistrer une action sans ouvrir l'app.
 - **Tuile Quick Settings** pour compter une « Question » depuis le volet des réglages rapides.
 
@@ -177,10 +188,15 @@ app/src/main/java/ma/wave/qcounter/
 ## 🎨 Identité visuelle
 
 Charte de marque : **jaune** (`#FFE167` → `#FDD05E`, cf. logo) + **rouge** `#D5442D`. Le jaune habille
-les **surfaces** (héro, FAB, conteneurs) tandis que les **accents de premier plan** (le « Q », icônes,
-barres) sont en **encre foncée** pour la lisibilité (et en jaune clair sur fond sombre). Palette
-d'indicateurs **Lagon** par défaut : sarcelle · rouge · gris. L'utilisateur peut aussi activer
-**Material You** (couleurs dynamiques tirées du fond d'écran, Android 12+). Détail dans [`LOGO.md`](LOGO.md).
+les **surfaces** (héro, conteneurs) tandis que les **accents de premier plan** (titre, icônes, barres)
+sont en **encre foncée** pour la lisibilité (et en jaune clair sur fond sombre). Le logo « bulle de
+discussion » intègre le mot‑symbole **Anh**. Palette d'indicateurs **Soleil** par défaut (doré · rouge ·
+or grisé). L'utilisateur peut activer **Material You** (couleurs dynamiques, Android 12+).
+Détail dans [`LOGO.md`](LOGO.md).
+
+**Style (Material 3 « tonal »)** : les cartes se distinguent par la **teinte** (`surfaceContainer`)
+plutôt que par des ombres, avec de **grands arrondis** et des **en‑têtes à badge d'icône** ; l'ombre
+est réservée aux éléments à mettre en focus (barre de saisie ancrée, bouton flottant).
 
 ---
 
@@ -204,7 +220,29 @@ gradle wrapper --gradle-version 8.13
 
 ## 🚀 Évolutions envisageables
 
-Idées restantes pour faire grandir l'app. Effort estimé : 🟢 rapide · 🟠 moyen · 🔴 conséquent.
+Idées pour faire grandir l'app. Effort estimé : 🟢 rapide · 🟠 moyen · 🔴 conséquent.
+
+### 🌱 Au-delà du compteur (nouvelles directions)
+
+Des pistes pour transformer l'app d'un simple compteur en véritable **outil d'observation et de
+debrief de conversations** :
+
+- 🟠 **Sessions** comme objets de premier plan : une conversation = une session datée, nommée, avec
+  son contexte (personne, lieu, sujet) et son propre rapport. Liste de sessions, reprise, comparaison.
+- 🔴 **Enregistrement audio synchronisé** : poser des « marqueurs » (les appuis) sur une timeline
+  audio, puis réécouter les moments d'esquive. (À cadrer côté consentement / confidentialité.)
+- 🔴 **Assistant IA de débrief** : à partir des compteurs (et d'une note libre), générer un résumé
+  et des conseils (« elle esquive surtout en fin d'échange »). Via l'API d'un LLM.
+- 🔴 **Détection assistée** : suggérer le type d'une réplique à partir d'une transcription vocale
+  (speech-to-text) — l'utilisateur valide d'un tap.
+- 🟠 **Notes & moments clés** : annoter une session (citations, ressenti), épingler des instants.
+- 🟠 **Rapport partageable** (PDF / image) : synthèse d'une session ou d'une période, à exporter.
+- 🟠 **Objectifs & gamification** : se fixer un cap (« RC > 50 % »), badges, encouragements.
+- 🔴 **Multi-appareils / web** : back-end de synchro (l'architecture repository isolé le permet).
+- 🔴 **Compagnon Wear OS** : compter discrètement depuis la montre.
+- 🟠 **Modèles de contexte** : jeux de catégories prêts à l'emploi (entretien d'embauche, négociation,
+  médiation, thérapie…) qui renomment/colorent les boutons selon la situation.
+- 🟠 **Mode minuteur de session** : durée de l'échange + cadence (interactions / minute).
 
 ### 📊 Données & analyse
 - 🟠 **Sessions nommées** : démarrer/clore une session (ex. « Réunion du 6/6 »), comparer les sessions.
@@ -212,20 +250,31 @@ Idées restantes pour faire grandir l'app. Effort estimé : 🟢 rapide · 🟠 
 - 🟠 **Évolution temporelle** du TEL/RC et de l'indice de clarté (courbe par jour).
 - 🟠 **Profils d'interlocuteurs** : suivre plusieurs personnes et comparer leurs comportements.
 - 🟢 **Note / contexte** par interaction (sujet, lieu, humeur).
+- 🟢 **Étiquettes / tags** sur une interaction ou une session, pour filtrer ensuite.
+- 🟠 **Comparaison à la session précédente** (delta du RC/TEL, moyennes glissantes).
+- 🟠 **Annulation multiple** (pile d'undo) plutôt que la seule dernière action.
 
 ### 📈 Visualisations
 - 🟢 **Sparkline** compacte dans l'en-tête ou l'historique.
 - 🟢 **Mode plein écran** d'un graphique (rotation paysage).
+- 🟠 **Comparaison de deux périodes** côte à côte (cette semaine vs précédente).
+- 🟢 **Légende interactive** : toucher un type pour le mettre en avant / le filtrer.
 
 ### 🖐️ Saisie & UX
 - 🟢 **Boutons de volume physiques** ou **gestes (swipe)** pour incrémenter sans regarder.
 - 🔴 **Compagnon Wear OS** (montre connectée).
 - 🟢 **Mode une main** / très gros boutons.
+- 🟠 **Widget redimensionnable réactif** (Glance `SizeMode.Responsive`) : une seule définition qui
+  s'adapte de 1×1 à 4×2, au lieu de 4 variantes distinctes.
+- 🟠 **Tuile Quick Settings / widget 1×1 configurables** : choisir l'action enregistrée (Directe,
+  Question ou Esquive) plutôt que « Question » par défaut.
+- 🟠 **Raccourcis dynamiques** (`ShortcutManager`) reflétant les **libellés personnalisés** des boutons.
 
 ### 🎨 Personnalisation
 - 🟠 **4ᵉ catégorie** personnalisée.
-- 🟠 **Couleurs personnalisées** (color picker) en plus des 3 presets.
+- 🟠 **Couleurs personnalisées** (color picker) en plus des presets.
 - 🟢 **Forcer le thème** clair/sombre (override système).
+- 🟢 **Icônes de raccourcis sur‑mesure** (glyphes ✓ / ↩ / ? au lieu de la bulle colorée).
 
 ### ☁️ Persistance & synchro
 - 🟢 **Partage** d'un récapitulatif (image / CSV) en plus de l'export JSON.
@@ -239,6 +288,8 @@ Idées restantes pour faire grandir l'app. Effort estimé : 🟢 rapide · 🟠 
 
 ### 🔒 Confidentialité
 - 🟠 **Verrouillage** par biométrie / code à l'ouverture.
+- 🟢 **`FLAG_SECURE` en mode discret** : masquer aussi le contenu dans l'aperçu des apps récentes.
+- 🟢 **Effacement auto** après une durée d'inactivité (option).
 
 ### 🛠️ Qualité & technique
 - 🟢 **Tests unitaires** : KPI dérivés, indice de clarté, séries, `moodEmoji`, fusion d'import.

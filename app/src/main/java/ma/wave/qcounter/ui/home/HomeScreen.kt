@@ -23,13 +23,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Insights
-import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.ThumbDown
+import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Card
@@ -84,12 +87,15 @@ import ma.wave.qcounter.ui.components.LegendItem
 import ma.wave.qcounter.ui.components.WaffleChart
 import ma.wave.qcounter.ui.components.SettingsSheet
 import ma.wave.qcounter.ui.components.ClarityScoreCard
+import ma.wave.qcounter.ui.components.YesNoCard
 import ma.wave.qcounter.ui.components.EmojiSet
 import ma.wave.qcounter.ui.components.StreakCard
 import ma.wave.qcounter.ui.components.answerTypeShortLabel
 import ma.wave.qcounter.ui.components.answerTypeVisual
+import ma.wave.qcounter.ui.components.darkerAccent
 import ma.wave.qcounter.ui.components.clarityEmoji
 import ma.wave.qcounter.ui.components.emojiSetOf
+import ma.wave.qcounter.ui.components.yesNoEmoji
 import ma.wave.qcounter.ui.components.moodEmoji
 import ma.wave.qcounter.ui.util.ShakeToAction
 import kotlinx.coroutines.delay
@@ -109,6 +115,7 @@ fun HomeScreen(
     onSetEmojiIntensity: (EmojiIntensity) -> Unit,
     onSetLongLabel: (AnswerType, String) -> Unit,
     onSetShortLabel: (AnswerType, String) -> Unit,
+    onSetCustomEnabled: (Boolean) -> Unit,
 ) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
     val streaks by viewModel.streaks.collectAsStateWithLifecycle()
@@ -196,7 +203,7 @@ fun HomeScreen(
                     }
                     IconButton(onClick = { showSettings = true }) {
                         Icon(
-                            imageVector = Icons.Rounded.Tune,
+                            imageVector = Icons.Rounded.Settings,
                             contentDescription = stringResource(R.string.cd_settings),
                             modifier = Modifier.size(24.dp),
                         )
@@ -208,6 +215,7 @@ fun HomeScreen(
             ActionPanel(
                 stats = stats,
                 onRecord = viewModel::record,
+                customEnabled = settings.customEnabled,
             )
         },
         floatingActionButton = {
@@ -261,6 +269,17 @@ fun HomeScreen(
                 )
                 StreakCard(streaks = streaks)
             }
+            if (stats.yesNoTotal > 0) {
+                YesNoCard(
+                    yes = stats.yesAnswers,
+                    no = stats.noAnswers,
+                    emoji = if (settings.showEmoji) {
+                        yesNoEmoji(stats.yesRatio, emojiSetOf(settings.emojiSetId))
+                    } else {
+                        null
+                    },
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -293,6 +312,7 @@ fun HomeScreen(
             onSetEmojiIntensity = onSetEmojiIntensity,
             onSetLongLabel = onSetLongLabel,
             onSetShortLabel = onSetShortLabel,
+            onSetCustomEnabled = onSetCustomEnabled,
             onExport = { exportLauncher.launch("qcounter-export.json") },
             onImport = {
                 importLauncher.launch(
@@ -578,11 +598,72 @@ private fun NavTile(
     }
 }
 
+/** Bouton compact Oui / Non : carte tonale + badge d'icône (même langage que les cartes d'action). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun YesNoButton(
+    label: String,
+    count: Int,
+    icon: ImageVector,
+    accent: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val haptic = LocalHapticFeedback.current
+    Card(
+        onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onClick()
+        },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = modifier,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(accent.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
+            )
+            AnimatedCount(
+                count = count,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = accent,
+            )
+        }
+    }
+}
+
 /** Panneau ancré en bas : zone de saisie mise en avant et accessible au pouce. */
 @Composable
 private fun ActionPanel(
     stats: InteractionStats,
     onRecord: (AnswerType) -> Unit,
+    customEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -605,6 +686,28 @@ private fun ActionPanel(
                 accent = answerTypeVisual(AnswerType.DIRECT).accent,
                 onClick = { onRecord(AnswerType.DIRECT) },
             )
+            // Oui / Non : réponses directes qualifiées, juste sous la carte Directe.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                YesNoButton(
+                    label = stringResource(R.string.action_yes),
+                    count = stats.yesAnswers,
+                    icon = Icons.Rounded.ThumbUp,
+                    accent = answerTypeVisual(AnswerType.DIRECT).accent,
+                    onClick = { onRecord(AnswerType.OUI) },
+                    modifier = Modifier.weight(1f),
+                )
+                YesNoButton(
+                    label = stringResource(R.string.action_no),
+                    count = stats.noAnswers,
+                    icon = Icons.Rounded.ThumbDown,
+                    accent = darkerAccent(answerTypeVisual(AnswerType.DIRECT).accent),
+                    onClick = { onRecord(AnswerType.NON) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
             ActionCard(
                 label = answerTypeVisual(AnswerType.QUESTION).label,
                 count = stats.questionAnswers,
@@ -619,6 +722,15 @@ private fun ActionPanel(
                 accent = answerTypeVisual(AnswerType.UNKNOWN).accent,
                 onClick = { onRecord(AnswerType.UNKNOWN) },
             )
+            if (customEnabled) {
+                ActionCard(
+                    label = answerTypeVisual(AnswerType.CUSTOM).label,
+                    count = stats.customAnswers,
+                    icon = answerTypeVisual(AnswerType.CUSTOM).icon,
+                    accent = answerTypeVisual(AnswerType.CUSTOM).accent,
+                    onClick = { onRecord(AnswerType.CUSTOM) },
+                )
+            }
         }
     }
 }

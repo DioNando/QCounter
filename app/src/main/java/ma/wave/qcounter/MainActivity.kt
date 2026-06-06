@@ -44,7 +44,8 @@ class MainActivity : ComponentActivity() {
             val direct by animateColorAsState(target.direct, animSpec, label = "accent-direct")
             val question by animateColorAsState(target.question, animSpec, label = "accent-question")
             val unknown by animateColorAsState(target.unknown, animSpec, label = "accent-unknown")
-            val palette = AccentPalette(target.name, direct, question, unknown)
+            val custom by animateColorAsState(target.custom, animSpec, label = "accent-custom")
+            val palette = AccentPalette(target.name, direct, question, unknown, custom)
 
             val answerLabels = rememberAnswerLabels(settings.labels)
 
@@ -65,6 +66,7 @@ class MainActivity : ComponentActivity() {
                             onSetEmojiIntensity = { scope.launch { settingsRepository.setEmojiIntensity(it) } },
                             onSetLongLabel = { type, value -> scope.launch { settingsRepository.setLongLabel(type, value) } },
                             onSetShortLabel = { type, value -> scope.launch { settingsRepository.setShortLabel(type, value) } },
+                            onSetCustomEnabled = { scope.launch { settingsRepository.setCustomEnabled(it) } },
                         )
                     }
                 }

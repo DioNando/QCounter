@@ -39,6 +39,7 @@ fun QCounterNavHost(
     onSetEmojiIntensity: (EmojiIntensity) -> Unit,
     onSetLongLabel: (AnswerType, String) -> Unit,
     onSetShortLabel: (AnswerType, String) -> Unit,
+    onSetCustomEnabled: (Boolean) -> Unit,
 ) {
     val navController = rememberNavController()
 
@@ -69,6 +70,7 @@ fun QCounterNavHost(
                 onSetEmojiIntensity = onSetEmojiIntensity,
                 onSetLongLabel = onSetLongLabel,
                 onSetShortLabel = onSetShortLabel,
+                onSetCustomEnabled = onSetCustomEnabled,
             )
         }
         composable(Routes.HISTORY) {
