@@ -1,6 +1,6 @@
 # Anh — Android natif (Kotlin + Jetpack Compose)
 
-> *Anciennement « QCounter ». Le `applicationId`/package restent `ma.wave.qcounter`.*
+> *Anciennement « QCounter » (package `ma.wave.qcounter`). Désormais l'`applicationId` **et** le package sont `ma.anh.app`.*
 
 Anh est une application Android de **suivi comportemental conversationnel**. Pendant un
 échange (entretien, négociation, discussion délicate…), trois boutons permettent d'enregistrer
@@ -84,6 +84,8 @@ montre la proportion Oui vs Non. C'est une qualification, pas une catégorie sé
 - **4ᵉ catégorie optionnelle** activable dans les réglages (libellé + couleur) — **neutre** dans les KPI.
 - **Visualisation au choix** : **pictogramme waffle**, **anneau (donut)** ou **anneaux d'activité**,
   avec remplissage animé, légende et pourcentages KPI compacts.
+- **Légende interactive** : toucher un type dans la légende du héro le **met en avant** et **estompe**
+  les autres dans le graphique (re-toucher pour tout réafficher).
 - **Indice de clarté** (avec emoji reflétant le score) et **séries** (en cours / record) en cartes dédiées.
 - **Emoji d'humeur** évolutif selon le comportement dominant **et son intensité** : 4 **jeux d'emojis**
   (Classique, Expressif, Animaux, Météo) et 3 niveaux de **sensibilité** (Subtil / Normal / Marqué).
@@ -99,7 +101,12 @@ montre la proportion Oui vs Non. C'est une qualification, pas une catégorie sé
 - **Annulation** par **bouton flottant éphémère** (apparaît après chaque saisie, disparaît au bout de
   quelques secondes) **et par secousse** (shake-to-undo, avec retour haptique).
 - **Mode discret** : un appui sur l'icône « œil » masque instantanément tout le contenu derrière un
-  écran neutre.
+  écran neutre. Tant qu'il est actif, **`FLAG_SECURE`** est posé (contenu masqué dans l'aperçu des
+  apps récentes et captures d'écran bloquées), et le réaffichage exige un **déverrouillage
+  biométrique** (`BiometricPrompt` ; réaffichage direct si aucune biométrie n'est configurée).
+  Le verrou est **persisté** (DataStore) : si l'app est fermée alors qu'elle est en mode discret,
+  elle **rouvre verrouillée** (aucun flash de l'accueil — rien ne s'affiche avant le chargement de
+  l'état), et il faut toucher l'écran pour lancer le déverrouillage biométrique.
 
 **Personnalisation**
 - **Couleurs dynamiques Material You** (Android 12+) activables en option.
@@ -115,10 +122,10 @@ montre la proportion Oui vs Non. C'est une qualification, pas une catégorie sé
 - **Tuile Quick Settings** pour compter une « Question » depuis le volet des réglages rapides.
 
 **Données**
-- **Export / Import** en JSON. L'import **fusionne** sans écraser ni créer de doublon (dédup sur
-  `type + horodatage`).
+- **Export / Import** en JSON, depuis la barre du haut de l'**Historique** (icônes ⬆ / ⬇). L'import
+  **fusionne** sans écraser ni créer de doublon (dédup sur `type + horodatage`).
 
-Réglages persistés via **DataStore** ; accessibles depuis la barre du haut.
+Réglages persistés via **DataStore** ; accessibles depuis l'icône engrenage de l'accueil.
 
 ---
 
@@ -133,9 +140,11 @@ Réglages persistés via **DataStore** ; accessibles depuis la barre du haut.
 | Persistance        | **Room** (SQLite) pour l'historique, **DataStore** pour les réglages |
 | Navigation         | Navigation-Compose (accueil ↔ historique ↔ graphiques) |
 | Injection          | Conteneur manuel via la classe `Application`           |
+| Sécurité           | **BiometricPrompt** (`androidx.biometric`) + `FLAG_SECURE` (mode discret) |
+| Tests              | **JUnit 4** (KPI, séries, (dé)sérialisation, fusion d'import) |
 | compileSdk         | 36                                                     |
 | minSdk / targetSdk | 24 / 35                                                |
-| applicationId      | `ma.wave.qcounter`                                      |
+| applicationId      | `ma.anh.app`                                      |
 
 Aucune dépendance de graphique externe : anneau, waffle, heatmap et barres sont dessinés avec des
 composables Compose (`Canvas` / `Box`) et animés via `animate*AsState`.
@@ -157,7 +166,7 @@ UI (Compose)  ─watch─►  ViewModel (StateFlow)  ─►  Repository  ─► 
 ### Arborescence
 
 ```
-app/src/main/java/ma/wave/qcounter/
+app/src/main/java/ma/anh/app/
 ├── QCounterApp.kt            # Application : base, repositories, applicationScope
 ├── MainActivity.kt           # Point d'entrée Compose (palette + libellés + Material You)
 ├── QuickRecordActivity.kt    # Trampoline sans UI pour les raccourcis du lanceur
@@ -171,7 +180,7 @@ app/src/main/java/ma/wave/qcounter/
     ├── ViewModelFactory.kt
     ├── navigation/           # QCounterNavHost (transitions animées)
     ├── theme/                # Color, Theme (Material You), Type, AccentPalette
-    ├── util/                 # ShakeDetector (accéléromètre)
+    ├── util/                 # ShakeDetector (accéléromètre), SecureReveal (FLAG_SECURE + biométrie)
     ├── components/           # ActionCard, AnimatedCount, AnswerTypeVisuals (+ libellés),
     │                         #   WaffleChart · DonutChart · ActivityRings · Heatmap ·
     │                         #   ActivityBarChart · ClarityScoreCard · StreakCard,
@@ -180,7 +189,9 @@ app/src/main/java/ma/wave/qcounter/
     ├── tile/                 # QCounterTileService (tuile Quick Settings)
     ├── home/                 # HomeViewModel, HomeScreen
     ├── charts/               # ChartsViewModel, ChartsScreen (heatmap + barres)
-    └── history/              # HistoryViewModel, HistoryScreen
+    └── history/              # HistoryViewModel, HistoryScreen (+ export/import JSON)
+
+app/src/test/java/ma/anh/app/      # Tests unitaires JUnit (KPI, séries, transfert JSON, import)
 ```
 
 ---
@@ -258,7 +269,6 @@ debrief de conversations** :
 - 🟢 **Sparkline** compacte dans l'en-tête ou l'historique.
 - 🟢 **Mode plein écran** d'un graphique (rotation paysage).
 - 🟠 **Comparaison de deux périodes** côte à côte (cette semaine vs précédente).
-- 🟢 **Légende interactive** : toucher un type pour le mettre en avant / le filtrer.
 
 ### 🖐️ Saisie & UX
 - 🟢 **Boutons de volume physiques** ou **gestes (swipe)** pour incrémenter sans regarder.
@@ -287,12 +297,13 @@ debrief de conversations** :
 - 🟠 **Objectifs** (ex. « monter le RC à 50 % ») avec suivi de progression et **gamification** (badges).
 
 ### 🔒 Confidentialité
-- 🟠 **Verrouillage** par biométrie / code à l'ouverture.
-- 🟢 **`FLAG_SECURE` en mode discret** : masquer aussi le contenu dans l'aperçu des apps récentes.
+- 🟠 **Verrouillage à l'ouverture** de l'app (biométrie / code), en plus du mode discret déjà protégé
+  par biométrie + `FLAG_SECURE`.
 - 🟢 **Effacement auto** après une durée d'inactivité (option).
 
 ### 🛠️ Qualité & technique
-- 🟢 **Tests unitaires** : KPI dérivés, indice de clarté, séries, `moodEmoji`, fusion d'import.
+- 🟢 **Tests unitaires** : ✅ KPI, indice de clarté, séries et fusion d'import couverts — reste à
+  étendre (`moodEmoji`, bandes d'emoji, polarité).
 - 🟠 **Tests UI Compose** des écrans clés.
 - 🟢 **CI** (GitHub Actions) : build + tests + lint à chaque push.
 - 🟢 **ktlint / Detekt** pour la cohérence du style.

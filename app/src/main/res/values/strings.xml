@@ -77,7 +77,9 @@
 
     <!-- Mode discret -->
     <string name="cd_discreet">Mode discret</string>
-    <string name="discreet_hint">Touchez pour afficher</string>
+    <string name="discreet_hint">Touchez pour déverrouiller</string>
+    <string name="biometric_title">Déverrouiller Anh</string>
+    <string name="biometric_subtitle">Authentifiez-vous pour afficher le contenu.</string>
 
     <!-- Indice de clarté (score comportemental) -->
     <string name="clarity_title">Indice de clarté</string>

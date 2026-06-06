@@ -8,8 +8,8 @@
         android:shortcutLongLabel="@string/action_direct">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="ma.wave.qcounter"
-            android:targetClass="ma.wave.qcounter.QuickRecordActivity">
+            android:targetPackage="ma.anh.app"
+            android:targetClass="ma.anh.app.QuickRecordActivity">
             <extra
                 android:name="qc_type"
                 android:value="DIRECT" />
@@ -23,8 +23,8 @@
         android:shortcutLongLabel="@string/action_question">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="ma.wave.qcounter"
-            android:targetClass="ma.wave.qcounter.QuickRecordActivity">
+            android:targetPackage="ma.anh.app"
+            android:targetClass="ma.anh.app.QuickRecordActivity">
             <extra
                 android:name="qc_type"
                 android:value="QUESTION" />
@@ -38,8 +38,8 @@
         android:shortcutLongLabel="@string/action_unknown">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="ma.wave.qcounter"
-            android:targetClass="ma.wave.qcounter.QuickRecordActivity">
+            android:targetPackage="ma.anh.app"
+            android:targetClass="ma.anh.app.QuickRecordActivity">
             <extra
                 android:name="qc_type"
                 android:value="UNKNOWN" />

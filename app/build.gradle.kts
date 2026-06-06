@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "ma.wave.qcounter"
+    namespace = "ma.anh.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "ma.wave.qcounter"
+        applicationId = "ma.anh.app"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -66,6 +66,14 @@ dependencies {
 
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
+
+    implementation(libs.androidx.biometric)
+    // biometric:1.1.0 tire un vieux fragment (1.2.x) dont startActivityForResult casse
+    // l'API ActivityResult (requestCode > 16 bits) → on force un fragment moderne.
+    implementation(libs.androidx.fragment)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.org.json)
 
     debugImplementation(libs.androidx.ui.tooling)
 }
