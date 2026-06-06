@@ -445,7 +445,7 @@ private fun IntensityOption(
             style = MaterialTheme.typography.labelLarge,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            color = if (selected) MaterialTheme.colorScheme.primary
+            color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
             else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -478,17 +478,19 @@ private fun ChartOption(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        val contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.onSurfaceVariant
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = contentColor,
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.Center,
             maxLines = 1,
+            color = contentColor,
         )
     }
 }
