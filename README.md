@@ -18,8 +18,12 @@ Portage natif de la spécification d'origine (décrite en Flutter + Riverpod dan
   - **Taux d'Esquive Linéaire (TEL)** — % de questions renvoyées.
   - **Ratio de Clarté (RC)** — % de réponses directes.
   - **Taux d'Indécision** — % d'esquives.
-- **Visualisation** : anneau (donut) animé de la répartition au centre de l'écran + légende,
-  et barres de progression animées pour chaque KPI.
+- **Visualisation au choix** sur l'accueil (réglages) : **pictogramme waffle**, **anneau (donut)**
+  ou **anneaux d'activité** — avec remplissage animé, légende et pourcentages KPI compacts.
+- **Emoji d'humeur** évolutif selon le comportement dominant **et son intensité** (10 expressions,
+  masquable dans les réglages).
+- **3 palettes** de couleurs d'indicateurs sélectionnables (Ciel / Forêt / Crépuscule), persistées.
+- **Réglages** accessibles via la barre du haut (DataStore).
 - **Annulation** : un *snackbar* « Annuler » apparaît après chaque saisie (et après chaque
   suppression dans l'historique) pour revenir en arrière.
 - **Historique horodaté** persistant, avec **mode sélection multiple** : appui long pour
@@ -64,19 +68,19 @@ UI (Compose)  ─watch─►  ViewModel (StateFlow)  ─►  Repository  ─► 
 
 ```
 app/src/main/java/ma/wave/qcounter/
-├── QCounterApp.kt            # Application : base + repository partagés
-├── MainActivity.kt           # Point d'entrée Compose
+├── QCounterApp.kt            # Application : base + repositories partagés
+├── MainActivity.kt           # Point d'entrée Compose, palette animée fournie ici
 ├── data/
-│   ├── model/                # AnswerType, InteractionStats (+ KPI dérivés)
+│   ├── model/                # AnswerType, InteractionStats (+ KPI), AppSettings/HomeChart
 │   ├── local/                # Entity, DAO, Converters, Database (Room)
-│   └── repository/           # InteractionRepository (source de vérité)
+│   └── repository/           # InteractionRepository + SettingsRepository (DataStore)
 └── ui/
     ├── ViewModelFactory.kt
-    ├── navigation/           # QCounterNavHost
-    ├── theme/                # Color, Theme, Type (palette bleu ciel)
-    ├── components/           # ActionCard, DonutChart, KpiDashboard, StatBar,
-    │                         #   DistributionBar/LegendItem, AnimatedCount,
-    │                         #   AnswerTypeVisuals, ResetConfirmationDialog
+    ├── navigation/           # QCounterNavHost (transitions animées)
+    ├── theme/                # Color, Theme, Type, AccentPalette (3 palettes)
+    ├── components/           # ActionCard, AnimatedCount, AnswerTypeVisuals,
+    │                         #   WaffleChart · DonutChart · ActivityRings (graphiques),
+    │                         #   MoodEmoji, SettingsSheet, ResetConfirmationDialog, LegendItem
     ├── home/                 # HomeViewModel, HomeScreen
     └── history/              # HistoryViewModel, HistoryScreen
 ```
@@ -118,9 +122,66 @@ gradle wrapper --gradle-version 8.13
 
 ---
 
-## 🚀 Évolutions prévues (hors scope actuel)
+## 🚀 Évolutions envisageables
 
-Conformément à la doc d'origine : API REST légère + conteneurisation Docker (PostgreSQL /
-Node.js) pour centraliser l'historique et analyser les métriques sur le long terme.
-L'architecture en couches (repository isolé) rend cette transition simple : il suffira
-d'ajouter une source de données distante derrière `InteractionRepository`.
+Liste d'idées pour faire grandir l'app, classées par thème. La mention indique l'effort estimé :
+🟢 rapide · 🟠 moyen · 🔴 conséquent.
+
+### 📊 Données & analyse
+- 🟠 **Sessions nommées** : démarrer/clore une session (ex. « Réunion du 6/6 »), comparer les sessions entre elles.
+- 🟠 **Filtres par période** dans l'historique (aujourd'hui / semaine / mois) + recherche.
+- 🟠 **Statistiques temporelles** : évolution du TEL/RC dans le temps, moyenne par session, meilleures/pires plages horaires.
+- 🟢 **Séries (streaks)** : « 5 réponses directes d'affilée », plus longue série, etc.
+- 🟠 **Profils d'interlocuteurs** : suivre plusieurs personnes et comparer leurs comportements.
+- 🟢 **Note / contexte** par interaction (sujet, lieu, humeur).
+- 🟠 **Score comportemental** synthétique (ex. « indice de clarté » global) avec interprétation.
+
+### 📈 Visualisations
+- 🟠 **Page Graphiques optionnelle** réactivable (courbe d'évolution lissée, barres, comparaison de sessions).
+- 🟠 **Heatmap** par heure/jour de la semaine.
+- 🟢 **Sparkline** compacte dans l'en-tête ou l'historique.
+- 🟢 **Mode plein écran** d'un graphique (rotation paysage).
+
+### 🖐️ Saisie & UX
+- 🔴 **Widget écran d'accueil** : compter sans ouvrir l'app.
+- 🟠 **App Shortcuts / Quick Settings tile** : saisie rapide depuis le lanceur ou les réglages rapides.
+- 🟢 **Boutons de volume physiques** ou **gestes (swipe)** pour incrémenter sans regarder.
+- 🔴 **Compagnon Wear OS** (montre connectée).
+- 🟢 **Annuler par secousse** (shake-to-undo) en plus du snackbar.
+- 🟢 **Mode une main** / très gros boutons.
+
+### 🎨 Personnalisation
+- 🟠 **Renommer les catégories** et/ou ajouter une **4ᵉ catégorie** personnalisée.
+- 🟠 **Couleurs personnalisées** (color picker) en plus des 3 presets.
+- 🟢 **Couleurs dynamiques Material You** réactivables en option.
+- 🟢 **Forcer le thème** clair/sombre (override système).
+- 🟢 **Réglage des emojis** : choisir un jeu d'emojis ou ajuster les seuils d'intensité.
+
+### ☁️ Persistance & synchro
+- 🟢 **Export / partage** des données (CSV, JSON, image récap).
+- 🟠 **Import** de données / restauration.
+- 🔴 **Back-end REST + Docker** (PostgreSQL / Node.js) — déjà prévu dans la doc d'origine :
+  synchro multi-appareils, historique centralisé. L'architecture (repository isolé) le rend simple :
+  il suffira d'ajouter une source distante derrière `InteractionRepository`.
+- 🟠 **Sauvegarde cloud** (Google Drive / compte utilisateur).
+
+### 🔔 Notifications & objectifs
+- 🟢 **Rappel quotidien** de bilan / **résumé hebdomadaire** en notification.
+- 🟠 **Objectifs** (ex. « monter le RC à 50 % ») avec suivi de progression et **gamification** (badges).
+
+### 🔒 Confidentialité
+- 🟠 **Verrouillage** par biométrie / code à l'ouverture.
+- 🟢 **Masquage rapide** / mode discret.
+
+### 🛠️ Qualité & technique
+- 🟢 **Tests unitaires** : KPI dérivés, répartition du waffle (`distribute`), `moodEmoji`.
+- 🟠 **Tests UI Compose** des écrans clés.
+- 🟢 **CI** (GitHub Actions) : build + tests + lint à chaque push.
+- 🟢 **ktlint / Detekt** pour la cohérence du style.
+- 🟠 **Accessibilité** : audit TalkBack, contrastes AA, tailles de police dynamiques.
+- 🟠 **Internationalisation** : anglais, **arabe (RTL)** — l'app est déjà en `supportsRtl`.
+- 🟠 **Hilt** pour l'injection si l'app grossit (remplace le conteneur manuel).
+- 🟢 **Migrations Room** versionnées + **Baseline Profiles** (perfs de démarrage).
+
+> 💡 Suggestions de **quick wins** pour démarrer : export CSV, séries (streaks), tests unitaires des KPI,
+> et le widget écran d'accueil pour l'usage au quotidien.

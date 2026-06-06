@@ -8,13 +8,13 @@
 
     <!-- En-tête / héro -->
     <string name="hero_volume_label">Volume Global</string>
-    <string name="hero_center_unit">interactions</string>
+    <string name="hero_center_unit">Interactions</string>
     <string name="hero_distribution">Répartition des réponses</string>
     <string name="hero_empty_hint">Touchez un bouton ci-dessous pour commencer le suivi 👇</string>
 
     <!-- KPI compacts affichés dans le héro -->
     <string name="kpi_rc_short">RC · Clarté</string>
-    <string name="kpi_tel_short">TEL · Esquive</string>
+    <string name="kpi_tel_short">TEL · Question</string>
     <string name="kpi_unknown_short">Indécision</string>
 
     <!-- Libellés courts pour la légende de la barre de répartition -->
@@ -38,6 +38,19 @@
     <string name="delete_dialog_title">Supprimer les éléments ?</string>
     <string name="delete_dialog_message">%1$d élément(s) seront définitivement supprimés.</string>
     <string name="snackbar_deleted">%1$d élément(s) supprimé(s)</string>
+
+    <!-- Réglages -->
+    <string name="settings_title">Réglages</string>
+    <string name="cd_settings">Réglages</string>
+    <string name="settings_show_emoji">Afficher l\'emoji d\'humeur</string>
+    <string name="settings_palette">Couleurs des indicateurs</string>
+    <string name="settings_home_chart">Graphique d\'accueil</string>
+    <string name="chart_waffle">Pictogramme</string>
+    <string name="chart_donut">Anneau</string>
+    <string name="chart_rings">Activité</string>
+
+    <!-- Tuile d'accès rapide (accueil) -->
+    <string name="tile_history">Historique</string>
 
     <!-- KPI -->
     <string name="kpi_title">Indicateurs</string>

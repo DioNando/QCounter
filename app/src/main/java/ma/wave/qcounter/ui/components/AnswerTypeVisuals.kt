@@ -10,9 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import ma.wave.qcounter.R
 import ma.wave.qcounter.data.model.AnswerType
-import ma.wave.qcounter.ui.theme.AccentDirect
-import ma.wave.qcounter.ui.theme.AccentQuestion
-import ma.wave.qcounter.ui.theme.AccentUnknown
+import ma.wave.qcounter.ui.theme.LocalAccentPalette
 
 /** Métadonnées visuelles (libellé, couleur d'accent, icône) propres à chaque type de réponse. */
 data class AnswerTypeVisual(
@@ -22,22 +20,25 @@ data class AnswerTypeVisual(
 )
 
 @Composable
-fun answerTypeVisual(type: AnswerType): AnswerTypeVisual = when (type) {
-    AnswerType.DIRECT -> AnswerTypeVisual(
-        label = stringResource(R.string.action_direct),
-        accent = AccentDirect,
-        icon = Icons.Rounded.CheckCircle,
-    )
+fun answerTypeVisual(type: AnswerType): AnswerTypeVisual {
+    val palette = LocalAccentPalette.current
+    return when (type) {
+        AnswerType.DIRECT -> AnswerTypeVisual(
+            label = stringResource(R.string.action_direct),
+            accent = palette.direct,
+            icon = Icons.Rounded.CheckCircle,
+        )
 
-    AnswerType.QUESTION -> AnswerTypeVisual(
-        label = stringResource(R.string.action_question),
-        accent = AccentQuestion,
-        icon = Icons.Rounded.QuestionAnswer,
-    )
+        AnswerType.QUESTION -> AnswerTypeVisual(
+            label = stringResource(R.string.action_question),
+            accent = palette.question,
+            icon = Icons.Rounded.QuestionAnswer,
+        )
 
-    AnswerType.UNKNOWN -> AnswerTypeVisual(
-        label = stringResource(R.string.action_unknown),
-        accent = AccentUnknown,
-        icon = Icons.Rounded.HelpOutline,
-    )
+        AnswerType.UNKNOWN -> AnswerTypeVisual(
+            label = stringResource(R.string.action_unknown),
+            accent = palette.unknown,
+            icon = Icons.Rounded.HelpOutline,
+        )
+    }
 }

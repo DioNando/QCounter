@@ -1,23 +1,27 @@
 package ma.wave.qcounter.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.rounded.TouchApp
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,10 +36,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -44,28 +51,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ma.wave.qcounter.R
 import ma.wave.qcounter.data.model.AnswerType
+import ma.wave.qcounter.data.model.AppSettings
+import ma.wave.qcounter.data.model.HomeChart
 import ma.wave.qcounter.data.model.InteractionStats
 import ma.wave.qcounter.ui.components.ActionCard
+import ma.wave.qcounter.ui.components.ActivityRings
 import ma.wave.qcounter.ui.components.AnimatedCount
 import ma.wave.qcounter.ui.components.DonutChart
 import ma.wave.qcounter.ui.components.LegendItem
+import ma.wave.qcounter.ui.components.WaffleChart
+import ma.wave.qcounter.ui.components.SettingsSheet
 import ma.wave.qcounter.ui.components.answerTypeVisual
-import ma.wave.qcounter.ui.theme.AccentDirect
-import ma.wave.qcounter.ui.theme.AccentQuestion
-import ma.wave.qcounter.ui.theme.AccentUnknown
+import ma.wave.qcounter.ui.components.moodEmoji
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     onOpenHistory: () -> Unit,
+    settings: AppSettings,
+    onSetShowEmoji: (Boolean) -> Unit,
+    onSetPalette: (Int) -> Unit,
+    onSetHomeChart: (HomeChart) -> Unit,
 ) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showSettings by remember { mutableStateOf(false) }
 
     val recordedTemplate = stringResource(R.string.snackbar_recorded)
     val undoLabel = stringResource(R.string.action_undo)
@@ -120,10 +136,11 @@ fun HomeScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onOpenHistory) {
+                    IconButton(onClick = { showSettings = true }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.List,
-                            contentDescription = stringResource(R.string.nav_history),
+                            imageVector = Icons.Rounded.Tune,
+                            contentDescription = stringResource(R.string.cd_settings),
+                            modifier = Modifier.size(24.dp),
                         )
                     }
                 },
@@ -136,25 +153,54 @@ fun HomeScreen(
             )
         },
     ) { innerPadding ->
+        // Zone défilable : si tout tient (waffle), rien ne défile ; sinon
+        // (anneau / anneaux, petits écrans) ça défile au lieu d'écraser la tuile.
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             HeroCard(
                 stats = stats,
+                showEmoji = settings.showEmoji,
+                homeChart = settings.homeChart,
                 modifier = Modifier.padding(top = 8.dp),
             )
+            NavTile(
+                label = stringResource(R.string.tile_history),
+                icon = Icons.Rounded.History,
+                onClick = onOpenHistory,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(4.dp))
         }
+    }
+
+    if (showSettings) {
+        SettingsSheet(
+            settings = settings,
+            onSetShowEmoji = onSetShowEmoji,
+            onSetPalette = onSetPalette,
+            onSetHomeChart = onSetHomeChart,
+            onDismiss = { showSettings = false },
+        )
     }
 }
 
 @Composable
 private fun HeroCard(
     stats: InteractionStats,
+    showEmoji: Boolean,
+    homeChart: HomeChart,
     modifier: Modifier = Modifier,
 ) {
+    val direct = answerTypeVisual(AnswerType.DIRECT)
+    val question = answerTypeVisual(AnswerType.QUESTION)
+    val unknown = answerTypeVisual(AnswerType.UNKNOWN)
+
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
@@ -166,7 +212,7 @@ private fun HeroCard(
                 .fillMaxWidth()
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 text = stringResource(R.string.hero_volume_label).uppercase(),
@@ -174,18 +220,27 @@ private fun HeroCard(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
 
-            DonutChart(stats = stats) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    AnimatedCount(
-                        count = stats.totalInteractions,
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                    Text(
-                        text = stringResource(R.string.hero_center_unit),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
+            if (showEmoji) {
+                Crossfade(targetState = moodEmoji(stats), label = "mood") { emoji ->
+                    Text(text = emoji, fontSize = 34.sp)
+                }
+            }
+
+            when (homeChart) {
+                HomeChart.WAFFLE -> {
+                    HeroVolume(stats.totalInteractions)
+                    WaffleChart(stats = stats, modifier = Modifier.padding(vertical = 4.dp))
+                }
+
+                HomeChart.DONUT -> {
+                    // L'anneau a un grand centre vide → on y place le total.
+                    DonutChart(stats = stats) { HeroCenter(stats.totalInteractions) }
+                }
+
+                HomeChart.RINGS -> {
+                    // Les anneaux d'activité ont un petit centre → total au-dessus.
+                    HeroVolume(stats.totalInteractions)
+                    ActivityRings(stats = stats)
                 }
             }
 
@@ -195,14 +250,18 @@ private fun HeroCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
-                        LegendItem(AccentDirect, stringResource(R.string.legend_direct), stats.directAnswers)
-                        LegendItem(AccentQuestion, stringResource(R.string.legend_question), stats.questionAnswers)
-                        LegendItem(AccentUnknown, stringResource(R.string.legend_unknown), stats.unknownAnswers)
+                        LegendItem(direct.accent, stringResource(R.string.legend_direct), stats.directAnswers)
+                        LegendItem(question.accent, stringResource(R.string.legend_question), stats.questionAnswers)
+                        LegendItem(unknown.accent, stringResource(R.string.legend_unknown), stats.unknownAnswers)
                     }
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f),
-                    )
-                    KpiSummary(stats = stats)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        MiniStat(stringResource(R.string.kpi_rc_short), stats.directRatio, direct.accent, Modifier.weight(1f))
+                        MiniStat(stringResource(R.string.kpi_tel_short), stats.questionRatio, question.accent, Modifier.weight(1f))
+                        MiniStat(stringResource(R.string.kpi_unknown_short), stats.unknownRatio, unknown.accent, Modifier.weight(1f))
+                    }
                 }
             }
 
@@ -218,40 +277,106 @@ private fun HeroCard(
     }
 }
 
-/** Ligne compacte des KPI (pourcentages) affichée dans le héro, sous la légende. */
+/** Total + unité affichés au-dessus du graphique (waffle / anneaux d'activité). */
 @Composable
-private fun KpiSummary(
-    stats: InteractionStats,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        MiniStat(stringResource(R.string.kpi_rc_short), stats.directRatio, AccentDirect)
-        MiniStat(stringResource(R.string.kpi_tel_short), stats.questionRatio, AccentQuestion)
-        MiniStat(stringResource(R.string.kpi_unknown_short), stats.unknownRatio, AccentUnknown)
+private fun HeroVolume(total: Int) {
+    AnimatedCount(
+        count = total,
+        style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
+    Text(
+        text = stringResource(R.string.hero_center_unit),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
+}
+
+/** Contenu central (total + unité) pour l'anneau (grand centre vide). */
+@Composable
+private fun HeroCenter(total: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        AnimatedCount(
+            count = total,
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        Text(
+            text = stringResource(R.string.hero_center_unit),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
     }
 }
 
+/** Pilule KPI : pourcentage coloré sur fond clair (bon contraste) + libellé. */
 @Composable
 private fun MiniStat(
     label: String,
     percent: Double,
     accent: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = String.format(Locale.getDefault(), "%.0f%%", percent),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = accent,
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = String.format(Locale.getDefault(), "%.0f%%", percent),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = accent,
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** Tuile compacte d'accès à l'historique (icône + libellé sur une ligne). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NavTile(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ElevatedCard(
+        onClick = onClick,
+        modifier = modifier.height(56.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp),
+            )
+            Spacer(Modifier.size(10.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
     }
 }
 
@@ -276,23 +401,6 @@ private fun ActionPanel(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.TouchApp,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp),
-                )
-                Text(
-                    text = stringResource(R.string.action_panel_title).uppercase(),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-
             ActionCard(
                 label = answerTypeVisual(AnswerType.DIRECT).label,
                 count = stats.directAnswers,
