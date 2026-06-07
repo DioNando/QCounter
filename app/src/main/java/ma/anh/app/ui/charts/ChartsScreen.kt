@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.Numbers
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,6 +45,7 @@ import ma.anh.app.R
 import ma.anh.app.data.model.AnswerType
 import ma.anh.app.ui.components.CardHeader
 import ma.anh.app.ui.components.answerTypeVisual
+import ma.anh.app.ui.components.compactCount
 import ma.anh.app.ui.components.Heatmap
 import ma.anh.app.ui.components.HeatmapLegend
 import ma.anh.app.ui.components.HourlyBarChart
@@ -57,6 +59,7 @@ fun ChartsScreen(
 ) {
     val heatmap by viewModel.heatmap.collectAsStateWithLifecycle()
     val records by viewModel.records.collectAsStateWithLifecycle()
+    val stats by viewModel.stats.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -89,6 +92,28 @@ fun ChartsScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         records.forEach { (type, length) ->
                             RecordRow(type = type, length = length)
+                        }
+                    }
+                }
+            }
+
+            // Chiffres exacts par catégorie (placés juste après les records de séries).
+            val categoryCounts = listOf(
+                AnswerType.DIRECT to stats.directAnswers,
+                AnswerType.OUI to stats.yesAnswers,
+                AnswerType.NON to stats.noAnswers,
+                AnswerType.QUESTION to stats.questionAnswers,
+                AnswerType.UNKNOWN to stats.unknownAnswers,
+                AnswerType.CUSTOM to stats.customAnswers,
+            ).filter { it.second > 0 }
+            if (categoryCounts.isNotEmpty()) {
+                ChartCard(
+                    icon = Icons.Rounded.Numbers,
+                    title = stringResource(R.string.category_totals_title),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        categoryCounts.forEach { (type, count) ->
+                            CategoryRow(type = type, count = count)
                         }
                     }
                 }
@@ -164,7 +189,44 @@ private fun RecordRow(type: AnswerType, length: Int) {
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = "×$length",
+            text = "×${compactCount(length)}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            color = visual.accent,
+        )
+    }
+}
+
+/** Une ligne « catégorie » : badge d'icône + libellé + **compte exact** (non raccourci). */
+@Composable
+private fun CategoryRow(type: AnswerType, count: Int) {
+    val visual = answerTypeVisual(type)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(visual.accent.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = visual.icon,
+                contentDescription = null,
+                tint = visual.accent,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        Text(
+            text = visual.label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = count.toString(),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.ExtraBold,
             color = visual.accent,

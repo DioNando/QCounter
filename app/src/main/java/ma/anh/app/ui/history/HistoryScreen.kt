@@ -7,6 +7,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +36,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +57,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,7 +68,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ma.anh.app.R
 import ma.anh.app.data.local.InteractionEntity
+import ma.anh.app.data.model.AnswerType
 import ma.anh.app.ui.components.ResetConfirmationDialog
+import ma.anh.app.ui.components.answerTypeShortLabel
 import ma.anh.app.ui.components.answerTypeVisual
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -77,11 +84,16 @@ fun HistoryScreen(
 ) {
     val history by viewModel.history.collectAsStateWithLifecycle()
     val selectedIds by viewModel.selectedIds.collectAsStateWithLifecycle()
+    val grouping by viewModel.grouping.collectAsStateWithLifecycle()
+    val hiddenTypes by viewModel.hiddenTypes.collectAsStateWithLifecycle()
+    val pageSize by viewModel.pageSize.collectAsStateWithLifecycle()
     val inSelection = selectedIds.isNotEmpty()
 
     var showResetDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var visibleCount by rememberSaveable { mutableStateOf(100) }
+    var showExportMenu by remember { mutableStateOf(false) }
+    // Choix retenu au moment d'ouvrir le sélecteur de fichier, appliqué au retour.
+    var exportOnlyVisible by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
@@ -89,7 +101,7 @@ fun HistoryScreen(
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json"),
     ) { uri ->
-        if (uri != null) viewModel.exportTo(context.contentResolver, uri) { ok ->
+        if (uri != null) viewModel.exportTo(context.contentResolver, uri, exportOnlyVisible) { ok ->
             Toast.makeText(
                 context,
                 context.getString(if (ok) R.string.export_success else R.string.export_error),
@@ -181,14 +193,38 @@ fun HistoryScreen(
                                 contentDescription = stringResource(R.string.settings_import),
                             )
                         }
-                        IconButton(
-                            onClick = { exportLauncher.launch("anh-export.json") },
-                            enabled = history.isNotEmpty(),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Upload,
-                                contentDescription = stringResource(R.string.settings_export),
-                            )
+                        Box {
+                            IconButton(
+                                onClick = { showExportMenu = true },
+                                enabled = history.isNotEmpty(),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Upload,
+                                    contentDescription = stringResource(R.string.settings_export),
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showExportMenu,
+                                onDismissRequest = { showExportMenu = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.export_all)) },
+                                    onClick = {
+                                        showExportMenu = false
+                                        exportOnlyVisible = false
+                                        exportLauncher.launch("anh-export.json")
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.export_filtered)) },
+                                    enabled = hiddenTypes.isNotEmpty(),
+                                    onClick = {
+                                        showExportMenu = false
+                                        exportOnlyVisible = true
+                                        exportLauncher.launch("anh-export-filtre.json")
+                                    },
+                                )
+                            }
                         }
                         IconButton(
                             onClick = { showResetDialog = true },
@@ -211,33 +247,89 @@ fun HistoryScreen(
                     .padding(innerPadding),
             )
         } else {
-            val shown = history.take(visibleCount)
-            LazyColumn(
+            val groupLabels = HistoryGroupLabels(
+                today = stringResource(R.string.history_group_today),
+                yesterday = stringResource(R.string.history_group_yesterday),
+                thisWeek = stringResource(R.string.history_group_this_week),
+                lastWeek = stringResource(R.string.history_group_last_week),
+                thisMonth = stringResource(R.string.history_group_this_month),
+                weekOfTemplate = stringResource(R.string.history_group_week_of),
+            )
+            val presentTypes = remember(history) {
+                history.map { it.type }.distinct().sortedBy { it.ordinal }
+            }
+            val filtered = remember(history, hiddenTypes) {
+                history.filterNot { it.type in hiddenTypes }
+            }
+            val shown = filtered.take(pageSize)
+            val sections = remember(shown, grouping) { groupHistory(shown, grouping) }
+
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                items(shown, key = { it.id }) { interaction ->
-                    InteractionRow(
-                        interaction = interaction,
-                        selected = selectedIds.contains(interaction.id),
-                        inSelection = inSelection,
-                        onClick = {
-                            if (inSelection) viewModel.toggleSelection(interaction.id)
-                        },
-                        onLongClick = { viewModel.toggleSelection(interaction.id) },
-                    )
-                }
-                if (history.size > visibleCount) {
-                    item(key = "show_more") {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            TextButton(onClick = { visibleCount += 100 }) {
-                                Text(stringResource(R.string.history_show_more, history.size - visibleCount))
+                HistoryControls(
+                    grouping = grouping,
+                    onSelectGrouping = viewModel::setGrouping,
+                    presentTypes = presentTypes,
+                    hiddenTypes = hiddenTypes,
+                    onToggleType = viewModel::toggleType,
+                    pageSize = pageSize,
+                    onSelectPageSize = viewModel::setPageSize,
+                )
+                if (filtered.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.history_filter_empty),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(24.dp),
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        sections.forEach { section ->
+                            item(key = "h-${section.startMillis}") {
+                                SectionHeader(
+                                    label = historySectionLabel(section.startMillis, grouping, groupLabels),
+                                )
+                            }
+                            items(section.items, key = { it.id }) { interaction ->
+                                InteractionRow(
+                                    interaction = interaction,
+                                    selected = selectedIds.contains(interaction.id),
+                                    inSelection = inSelection,
+                                    onClick = {
+                                        if (inSelection) viewModel.toggleSelection(interaction.id)
+                                    },
+                                    onLongClick = { viewModel.toggleSelection(interaction.id) },
+                                )
+                            }
+                        }
+                        if (filtered.size > pageSize) {
+                            item(key = "more_hidden") {
+                                Text(
+                                    text = stringResource(R.string.history_more_hidden, filtered.size - pageSize),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 4.dp),
+                                )
                             }
                         }
                     }
@@ -335,6 +427,121 @@ private fun InteractionRow(
             }
         }
     }
+}
+
+/** Barre de contrôles : choix du regroupement + filtres de catégories. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HistoryControls(
+    grouping: HistoryGrouping,
+    onSelectGrouping: (HistoryGrouping) -> Unit,
+    presentTypes: List<AnswerType>,
+    hiddenTypes: Set<AnswerType>,
+    onToggleType: (AnswerType) -> Unit,
+    pageSize: Int,
+    onSelectPageSize: (Int) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            GroupingChip(stringResource(R.string.history_group_day), grouping == HistoryGrouping.DAY) {
+                onSelectGrouping(HistoryGrouping.DAY)
+            }
+            GroupingChip(stringResource(R.string.history_group_week), grouping == HistoryGrouping.WEEK) {
+                onSelectGrouping(HistoryGrouping.WEEK)
+            }
+            GroupingChip(stringResource(R.string.history_group_month), grouping == HistoryGrouping.MONTH) {
+                onSelectGrouping(HistoryGrouping.MONTH)
+            }
+        }
+        // Nombre d'éléments affichés.
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.history_page_size),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            listOf(50, 100, 250).forEach { n ->
+                GroupingChip(n.toString(), pageSize == n) { onSelectPageSize(n) }
+            }
+        }
+        // Filtres de catégories : une puce par type présent (toucher pour afficher/masquer).
+        if (presentTypes.size > 1) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                presentTypes.forEach { type ->
+                    val visual = answerTypeVisual(type)
+                    val visible = type !in hiddenTypes
+                    FilterChip(
+                        selected = visible,
+                        onClick = { onToggleType(type) },
+                        label = { Text(answerTypeShortLabel(type)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = visual.icon,
+                                contentDescription = null,
+                                tint = if (visible) visual.accent else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                        colors = tonalChipColors(),
+                        border = null,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GroupingChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        colors = tonalChipColors(),
+        border = null,
+    )
+}
+
+/**
+ * Couleurs de puce **tonales** (sans bordure) cohérentes avec l'UI : surface tonale au repos,
+ * jaune de marque **plus saturé** (`secondaryContainer`) sélectionné — réservé aux boutons,
+ * tandis que les cartes d'historique utilisent le jaune **moins saturé** (`primaryContainer`).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun tonalChipColors() = FilterChipDefaults.filterChipColors(
+    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+    labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    iconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+    selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+)
+
+/** En-tête de section (Aujourd'hui / Cette semaine / Juin 2026…). */
+@Composable
+private fun SectionHeader(label: String) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, bottom = 2.dp),
+    )
 }
 
 @Composable

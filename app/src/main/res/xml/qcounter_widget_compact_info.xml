@@ -8,4 +8,5 @@
     android:widgetCategory="home_screen"
     android:description="@string/widget_description_compact"
     android:configure="ma.anh.app.ui.widget.CompactWidgetConfigActivity"
+    android:previewLayout="@layout/widget_preview_compact"
     android:initialLayout="@layout/glance_default_loading_layout" />

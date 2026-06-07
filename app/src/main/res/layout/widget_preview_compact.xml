@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aperçu de la variante 1×1 : tuile tonale unique (Question par défaut). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/widget_preview_tile"
+    android:backgroundTint="#E7E4DC"
+    android:padding="6dp">
+
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_widget_question"
+        android:tint="#D5442D" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="22"
+        android:textColor="#D5442D"
+        android:textStyle="bold"
+        android:textSize="20sp" />
+</LinearLayout>

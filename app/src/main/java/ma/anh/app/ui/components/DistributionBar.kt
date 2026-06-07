@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -115,27 +116,41 @@ fun LegendItem(
     val itemAlpha by animateFloatAsState(targetAlpha, tween(220), label = "legend-alpha")
 
     val interactive = onClick != null
-    val shape = RoundedCornerShape(50)
-    Row(
+    val shape = RoundedCornerShape(14.dp)
+    // Disposition verticale : pastille + libellé en haut, nombre (compact) dessous → pas de
+    // retour à la ligne, même avec de grands compteurs.
+    Column(
         modifier = modifier
             .clip(shape)
             .then(if (interactive) Modifier.clickable { onClick!!() } else Modifier)
             .then(if (selected) Modifier.background(color.copy(alpha = 0.18f)) else Modifier)
             .alpha(itemAlpha)
-            .padding(horizontal = if (interactive) 8.dp else 0.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            modifier = Modifier
-                .size(10.dp)
-                .clip(CircleShape)
-                .background(color),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(color),
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+            )
+        }
         Text(
-            text = "$label · $count",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            text = compactCount(count),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = color,
+            maxLines = 1,
         )
     }
 }

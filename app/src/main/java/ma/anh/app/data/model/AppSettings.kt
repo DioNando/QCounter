@@ -46,4 +46,6 @@ data class AppSettings(
     val customEnabled: Boolean = false,
     /** Mode discret actif : persisté pour rester verrouillé même après fermeture de l'app. */
     val discreet: Boolean = false,
+    /** Boutons d'action réduits : panneau remplacé par un bouton flottant qui déploie les icônes. */
+    val compactActions: Boolean = false,
 )

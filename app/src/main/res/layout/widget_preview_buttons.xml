@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aperçu de la variante 2×1 : total + tuiles tonales Directe et Question. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@drawable/widget_preview_bg"
+    android:gravity="center_vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="128"
+        android:textColor="#1D1D1B"
+        android:textStyle="bold"
+        android:textSize="22sp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@drawable/widget_preview_tile"
+        android:backgroundTint="#E7E4DC">
+        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+            android:src="@drawable/ic_widget_direct" android:tint="#F2B705" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="84" android:textStyle="bold" android:textColor="#F2B705" android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_marginStart="6dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@drawable/widget_preview_tile"
+        android:backgroundTint="#E7E4DC">
+        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+            android:src="@drawable/ic_widget_question" android:tint="#D5442D" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="22" android:textStyle="bold" android:textColor="#D5442D" android:textSize="13sp" />
+    </LinearLayout>
+</LinearLayout>

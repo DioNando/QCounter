@@ -37,7 +37,7 @@ fun AnimatedCount(
         scale.animateTo(1f, animationSpec = spring())
     }
     Text(
-        text = animated.toString(),
+        text = compactCount(animated),
         modifier = modifier.scale(scale.value),
         style = style,
         color = color,

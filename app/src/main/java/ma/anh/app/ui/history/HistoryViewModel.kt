@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ma.anh.app.data.io.InteractionTransfer
 import ma.anh.app.data.local.InteractionEntity
+import ma.anh.app.data.model.AnswerType
 import ma.anh.app.data.repository.InteractionRepository
 
 /** Événement émis après une suppression, pour proposer l'annulation. */
@@ -35,6 +36,30 @@ class HistoryViewModel(
 
     private val _selectedIds = MutableStateFlow<Set<Long>>(emptySet())
     val selectedIds: StateFlow<Set<Long>> = _selectedIds.asStateFlow()
+
+    /** Granularité de regroupement (jour / semaine / mois). */
+    private val _grouping = MutableStateFlow(HistoryGrouping.DAY)
+    val grouping: StateFlow<HistoryGrouping> = _grouping.asStateFlow()
+
+    /** Catégories masquées (filtre d'affichage). Vide = tout afficher. */
+    private val _hiddenTypes = MutableStateFlow<Set<AnswerType>>(emptySet())
+    val hiddenTypes: StateFlow<Set<AnswerType>> = _hiddenTypes.asStateFlow()
+
+    /** Nombre d'interactions affichées (50 / 100 / 250). */
+    private val _pageSize = MutableStateFlow(100)
+    val pageSize: StateFlow<Int> = _pageSize.asStateFlow()
+
+    fun setPageSize(value: Int) {
+        _pageSize.value = value
+    }
+
+    fun setGrouping(value: HistoryGrouping) {
+        _grouping.value = value
+    }
+
+    fun toggleType(type: AnswerType) {
+        _hiddenTypes.update { if (type in it) it - type else it + type }
+    }
 
     private val _events = MutableSharedFlow<DeletedEvent>(
         replay = 0,
@@ -78,11 +103,25 @@ class HistoryViewModel(
         clearSelection()
     }
 
-    /** Exporte tout l'historique en JSON vers [uri]. [onResult] reçoit true si succès. */
-    fun exportTo(resolver: ContentResolver, uri: Uri, onResult: (Boolean) -> Unit) {
+    /**
+     * Exporte l'historique en JSON vers [uri]. Si [onlyVisibleCategories] est vrai, n'exporte que
+     * les catégories actuellement affichées (filtres) ; sinon tout. [onResult] reçoit true si succès.
+     */
+    fun exportTo(
+        resolver: ContentResolver,
+        uri: Uri,
+        onlyVisibleCategories: Boolean,
+        onResult: (Boolean) -> Unit,
+    ) {
         viewModelScope.launch {
             val success = runCatching {
-                val json = InteractionTransfer.encode(repository.exportAll())
+                val all = repository.exportAll()
+                val items = if (onlyVisibleCategories) {
+                    all.filterNot { it.type in _hiddenTypes.value }
+                } else {
+                    all
+                }
+                val json = InteractionTransfer.encode(items)
                 withContext(Dispatchers.IO) {
                     resolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
                         ?: error("flux de sortie indisponible")

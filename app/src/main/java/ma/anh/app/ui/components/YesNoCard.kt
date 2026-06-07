@@ -111,13 +111,13 @@ fun YesNoCard(yes: Int, no: Int, modifier: Modifier = Modifier, emoji: String? =
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "${stringResource(R.string.action_yes)} · $yes ($yesPct%)",
+                    text = "${stringResource(R.string.action_yes)} · ${compactCount(yes)} ($yesPct%)",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = accent,
                 )
                 Text(
-                    text = "${stringResource(R.string.action_no)} · $no ($noPct%)",
+                    text = "${stringResource(R.string.action_no)} · ${compactCount(no)} ($noPct%)",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = nonColor,

@@ -28,6 +28,7 @@ class SettingsRepository(private val context: Context) {
         val EMOJI_INTENSITY = intPreferencesKey("emoji_intensity")
         val CUSTOM_ENABLED = booleanPreferencesKey("custom_enabled")
         val DISCREET = booleanPreferencesKey("discreet")
+        val COMPACT_ACTIONS = booleanPreferencesKey("compact_actions")
 
         // Libellés personnalisés (longs et courts) par type.
         fun longLabel(type: AnswerType) = stringPreferencesKey("label_long_${type.name}")
@@ -56,11 +57,16 @@ class SettingsRepository(private val context: Context) {
             ),
             customEnabled = prefs[Keys.CUSTOM_ENABLED] ?: false,
             discreet = prefs[Keys.DISCREET] ?: false,
+            compactActions = prefs[Keys.COMPACT_ACTIONS] ?: false,
         )
     }
 
     suspend fun setDiscreet(value: Boolean) {
         context.dataStore.edit { it[Keys.DISCREET] = value }
+    }
+
+    suspend fun setCompactActions(value: Boolean) {
+        context.dataStore.edit { it[Keys.COMPACT_ACTIONS] = value }
     }
 
     suspend fun setShowEmoji(value: Boolean) {

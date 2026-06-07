@@ -2,8 +2,12 @@ package ma.anh.app.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
@@ -29,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.Settings
@@ -41,6 +46,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,10 +64,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -111,6 +119,7 @@ fun HomeScreen(
     onOpenCharts: () -> Unit,
     settings: AppSettings,
     onSetDiscreet: (Boolean) -> Unit,
+    onSetCompactActions: (Boolean) -> Unit,
     onSetShowEmoji: (Boolean) -> Unit,
     onSetPalette: (Int) -> Unit,
     onSetHomeChart: (HomeChart) -> Unit,
@@ -196,30 +205,46 @@ fun HomeScreen(
             )
         },
         bottomBar = {
-            ActionPanel(
-                stats = stats,
-                onRecord = viewModel::record,
-                customEnabled = settings.customEnabled,
-            )
+            // Panneau d'action plein, sauf en mode réduit (remplacé par le bouton flottant).
+            if (!settings.compactActions) {
+                ActionPanel(
+                    stats = stats,
+                    onRecord = viewModel::record,
+                    customEnabled = settings.customEnabled,
+                )
+            }
         },
         floatingActionButton = {
-            // Bouton flottant « Annuler » en bas à droite, qui s'efface après quelques secondes.
-            AnimatedVisibility(
-                visible = undoVisible,
-                enter = fadeIn(),
-                exit = fadeOut(),
+            Column(
+                modifier = Modifier.padding(end = 8.dp),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                ExtendedFloatingActionButton(
-                    onClick = { undoLast() },
-                    icon = { Icon(Icons.Rounded.Undo, contentDescription = null) },
-                    text = { Text(stringResource(R.string.action_undo)) },
-                    elevation = FloatingActionButtonDefaults.elevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 0.dp,
-                        focusedElevation = 0.dp,
-                        hoveredElevation = 0.dp,
-                    ),
-                )
+                // Bouton flottant « Annuler » qui s'efface après quelques secondes.
+                AnimatedVisibility(
+                    visible = undoVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    ExtendedFloatingActionButton(
+                        onClick = { undoLast() },
+                        icon = { Icon(Icons.Rounded.Undo, contentDescription = null) },
+                        text = { Text(stringResource(R.string.action_undo)) },
+                        elevation = FloatingActionButtonDefaults.elevation(
+                            defaultElevation = 0.dp,
+                            pressedElevation = 0.dp,
+                            focusedElevation = 0.dp,
+                            hoveredElevation = 0.dp,
+                        ),
+                    )
+                }
+                // Mode réduit : bouton flottant qui déploie les icônes d'action.
+                if (settings.compactActions) {
+                    ActionSpeedDial(
+                        onRecord = viewModel::record,
+                        customEnabled = settings.customEnabled,
+                    )
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.End,
@@ -231,6 +256,8 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
+                // Marge légère pour ne pas coller le dernier élément au bouton flottant (mode réduit).
+                .padding(bottom = if (settings.compactActions) 12.dp else 0.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -297,6 +324,7 @@ fun HomeScreen(
             onSetLongLabel = onSetLongLabel,
             onSetShortLabel = onSetShortLabel,
             onSetCustomEnabled = onSetCustomEnabled,
+            onSetCompactActions = onSetCompactActions,
             onDismiss = { showSettings = false },
         )
     }
@@ -648,6 +676,128 @@ private fun YesNoButton(
                 color = accent,
             )
         }
+    }
+}
+
+/**
+ * Mode réduit : bouton flottant qui déploie verticalement les icônes d'action (animé).
+ * Un appui sur une icône enregistre l'action puis referme le menu.
+ */
+@Composable
+private fun ActionSpeedDial(
+    onRecord: (AnswerType) -> Unit,
+    customEnabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val haptic = LocalHapticFeedback.current
+    var expanded by remember { mutableStateOf(false) }
+    val rotation by animateFloatAsState(
+        targetValue = if (expanded) 45f else 0f,
+        animationSpec = spring(),
+        label = "speed-dial-rotation",
+    )
+
+    val actions = buildList {
+        add(AnswerType.DIRECT)
+        add(AnswerType.OUI)
+        add(AnswerType.NON)
+        add(AnswerType.QUESTION)
+        add(AnswerType.UNKNOWN)
+        if (customEnabled) add(AnswerType.CUSTOM)
+    }
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        AnimatedVisibility(
+            visible = expanded,
+            // Pas d'animation de groupe : chaque bouton gère son propre rebond (apparition échelonnée).
+            enter = EnterTransition.None,
+            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                actions.forEachIndexed { index, type ->
+                    val visual = answerTypeVisual(type)
+                    MiniActionFab(
+                        icon = visual.icon,
+                        accent = visual.accent,
+                        contentDescription = visual.label,
+                        // Apparition du bas (près du bouton flottant) vers le haut.
+                        appearanceOrder = actions.lastIndex - index,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onRecord(type)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        }
+        FloatingActionButton(
+            onClick = { expanded = !expanded },
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Add,
+                contentDescription = stringResource(
+                    if (expanded) R.string.cd_actions_collapse else R.string.cd_actions_expand,
+                ),
+                modifier = Modifier.rotate(rotation),
+            )
+        }
+    }
+}
+
+/**
+ * Pastille flottante d'action (mode réduit) : **fond coloré** à la couleur du type, icône contrastée.
+ * Apparaît avec un **rebond**, échelonné selon [appearanceOrder].
+ */
+@Composable
+private fun MiniActionFab(
+    icon: ImageVector,
+    accent: Color,
+    contentDescription: String,
+    appearanceOrder: Int,
+    onClick: () -> Unit,
+) {
+    val scale = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        delay(appearanceOrder * 55L)
+        scale.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow,
+            ),
+        )
+    }
+    // Icône contrastée selon la luminosité du fond (encre sur jaune clair, blanc sur couleurs foncées).
+    val onAccent = if (accent.luminance() > 0.5f) Color(0xFF1D1D1B) else Color.White
+    FloatingActionButton(
+        onClick = onClick,
+        containerColor = accent,
+        contentColor = onAccent,
+        // Pas d'ombre sur les boutons d'action (réservée au bouton flottant principal).
+        elevation = FloatingActionButtonDefaults.elevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            focusedElevation = 0.dp,
+            hoveredElevation = 0.dp,
+        ),
+        modifier = Modifier.scale(scale.value),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = onAccent,
+            modifier = Modifier.size(30.dp),
+        )
     }
 }
 

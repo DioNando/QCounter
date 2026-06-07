@@ -64,6 +64,7 @@ class MainActivity : FragmentActivity() {
                             factory = factory,
                             settings = settings,
                             onSetDiscreet = { scope.launch { settingsRepository.setDiscreet(it) } },
+                            onSetCompactActions = { scope.launch { settingsRepository.setCompactActions(it) } },
                             onSetShowEmoji = { scope.launch { settingsRepository.setShowEmoji(it) } },
                             onSetPalette = { scope.launch { settingsRepository.setPalette(it) } },
                             onSetHomeChart = { scope.launch { settingsRepository.setHomeChart(it) } },

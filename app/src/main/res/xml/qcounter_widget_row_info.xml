@@ -7,4 +7,5 @@
     android:resizeMode="horizontal"
     android:widgetCategory="home_screen"
     android:description="@string/widget_description_row"
+    android:previewLayout="@layout/widget_preview_row"
     android:initialLayout="@layout/glance_default_loading_layout" />

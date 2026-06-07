@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.Mood
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.StarOutline
 import androidx.compose.material.icons.rounded.TrackChanges
+import androidx.compose.material.icons.rounded.UnfoldLess
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +65,7 @@ fun SettingsSheet(
     onSetLongLabel: (AnswerType, String) -> Unit,
     onSetShortLabel: (AnswerType, String) -> Unit,
     onSetCustomEnabled: (Boolean) -> Unit,
+    onSetCompactActions: (Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -252,6 +254,15 @@ fun SettingsSheet(
                 supportingText = stringResource(R.string.settings_custom_category_desc),
                 checked = settings.customEnabled,
                 onCheckedChange = onSetCustomEnabled,
+            )
+
+            // Boutons d'action réduits (icônes via un bouton flottant).
+            SettingToggleRow(
+                icon = Icons.Rounded.UnfoldLess,
+                label = stringResource(R.string.settings_compact_actions),
+                supportingText = stringResource(R.string.settings_compact_actions_desc),
+                checked = settings.compactActions,
+                onCheckedChange = onSetCompactActions,
             )
 
             Text(

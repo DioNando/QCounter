@@ -3,15 +3,17 @@ package ma.anh.app.ui.widget
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
@@ -34,6 +36,7 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -42,7 +45,9 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import kotlinx.coroutines.flow.first
 import ma.anh.app.QCounterApp
+import ma.anh.app.R
 import ma.anh.app.data.model.AnswerType
+import ma.anh.app.ui.components.compactCount
 import ma.anh.app.data.model.InteractionStats
 
 /** Clé d'argument transportant le type de réponse à enregistrer depuis le widget. */
@@ -51,21 +56,20 @@ val RecordTypeKey = ActionParameters.Key<String>("qc_record_type")
 /** État par widget 1×1 : type d'action choisi à la configuration. */
 val CompactActionKey = stringPreferencesKey("compact_action")
 
+/** État par widget 2×1 : les deux types affichés, choisis à la configuration. */
+val ButtonsFirstKey = stringPreferencesKey("buttons_action_1")
+val ButtonsSecondKey = stringPreferencesKey("buttons_action_2")
+
 // Boutons : palette de marque « Soleil » (le fond, lui, suit Material You via GlanceTheme).
 private val DirectColor = Color(0xFFF2B705)   // doré
 private val QuestionColor = Color(0xFFD5442D) // rouge
 private val UnknownColor = Color(0xFFBFA94E)  // or grisé
-private val InkOnLight = Color(0xFF2A2410)    // texte foncé pour les tuiles claires
+private val CustomColor = Color(0xFF7E57C2)   // violet (4ᵉ catégorie)
 
 private val SmallWidget = DpSize(150.dp, 100.dp)
 private val LargeWidget = DpSize(220.dp, 150.dp)
 
-/** Couleur de texte lisible selon la luminosité de la tuile. */
-private fun onTile(tile: Color): Color =
-    if (tile.luminance() > 0.4f) InkOnLight else Color.White
-
-private val CustomColor = Color(0xFF7E57C2) // violet (4ᵉ catégorie)
-
+/** Accent (couleur de marque) d'un type, utilisé en premier plan sur une tuile tonale. */
 private fun colorFor(type: AnswerType): Color = when (type) {
     AnswerType.DIRECT -> DirectColor
     AnswerType.QUESTION -> QuestionColor
@@ -75,13 +79,12 @@ private fun colorFor(type: AnswerType): Color = when (type) {
     AnswerType.OUI, AnswerType.NON -> DirectColor
 }
 
-private fun shortFor(type: AnswerType): String = when (type) {
-    AnswerType.DIRECT -> "D"
-    AnswerType.QUESTION -> "Q"
-    AnswerType.UNKNOWN -> "?"
-    AnswerType.CUSTOM -> "+"
-    AnswerType.OUI -> "O"
-    AnswerType.NON -> "N"
+/** Icône (drawable) d'un type, alignée sur les icônes de l'app. */
+private fun iconResFor(type: AnswerType): Int = when (type) {
+    AnswerType.DIRECT, AnswerType.OUI, AnswerType.NON -> R.drawable.ic_widget_direct
+    AnswerType.QUESTION -> R.drawable.ic_widget_question
+    AnswerType.UNKNOWN -> R.drawable.ic_widget_unknown
+    AnswerType.CUSTOM -> R.drawable.ic_widget_unknown
 }
 
 private fun countFor(stats: InteractionStats, type: AnswerType): Int = when (type) {
@@ -126,7 +129,7 @@ private fun WidgetContent(stats: InteractionStats, showTitle: Boolean) {
             )
         }
         Text(
-            text = "${stats.totalInteractions}",
+            text = compactCount(stats.totalInteractions),
             style = TextStyle(
                 color = GlanceTheme.colors.onSurface,
                 fontWeight = FontWeight.Bold,
@@ -136,46 +139,48 @@ private fun WidgetContent(stats: InteractionStats, showTitle: Boolean) {
         Spacer(GlanceModifier.height(8.dp))
         // La rangée de boutons occupe la hauteur restante (pas d'espace vide).
         Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
-            WidgetButton("D", stats.directAnswers, AnswerType.DIRECT, DirectColor, GlanceModifier.defaultWeight())
+            WidgetButton(AnswerType.DIRECT, stats.directAnswers, DirectColor, GlanceModifier.defaultWeight())
             Spacer(GlanceModifier.width(6.dp))
-            WidgetButton("Q", stats.questionAnswers, AnswerType.QUESTION, QuestionColor, GlanceModifier.defaultWeight())
+            WidgetButton(AnswerType.QUESTION, stats.questionAnswers, QuestionColor, GlanceModifier.defaultWeight())
             Spacer(GlanceModifier.width(6.dp))
-            WidgetButton("?", stats.unknownAnswers, AnswerType.UNKNOWN, UnknownColor, GlanceModifier.defaultWeight())
+            WidgetButton(AnswerType.UNKNOWN, stats.unknownAnswers, UnknownColor, GlanceModifier.defaultWeight())
         }
     }
 }
 
-/** Bouton : tuile pleine (palette de marque) remplissant la hauteur, texte à contraste automatique. */
+/** Bouton : tuile **tonale** (comme les cartes de l'app) + icône et compteur à la couleur d'accent. */
 @Composable
 private fun WidgetButton(
-    short: String,
-    count: Int,
     type: AnswerType,
-    tile: Color,
+    count: Int,
+    accent: Color,
     modifier: GlanceModifier,
 ) {
-    val content = ColorProvider(onTile(tile))
+    val content = ColorProvider(accent)
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .background(tile)
-            .cornerRadius(12.dp)
+            .background(GlanceTheme.colors.surfaceVariant)
+            .cornerRadius(16.dp)
             .clickable(
                 actionRunCallback<RecordActionCallback>(
                     actionParametersOf(RecordTypeKey to type.name),
                 ),
             )
-            .padding(vertical = 8.dp),
+            .padding(vertical = 6.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = "$count",
-            style = TextStyle(color = content, fontWeight = FontWeight.Bold),
+        Image(
+            provider = ImageProvider(iconResFor(type)),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(content),
+            modifier = GlanceModifier.size(22.dp),
         )
+        Spacer(GlanceModifier.height(2.dp))
         Text(
-            text = short,
-            style = TextStyle(color = content, textAlign = TextAlign.Center),
+            text = compactCount(count),
+            style = TextStyle(color = content, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
         )
     }
 }
@@ -202,7 +207,7 @@ private fun WidgetRowContent(stats: InteractionStats) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "${stats.totalInteractions}",
+            text = compactCount(stats.totalInteractions),
             style = TextStyle(
                 color = GlanceTheme.colors.onSurface,
                 fontWeight = FontWeight.Bold,
@@ -210,11 +215,11 @@ private fun WidgetRowContent(stats: InteractionStats) {
             ),
         )
         Spacer(GlanceModifier.width(10.dp))
-        WidgetButton("D", stats.directAnswers, AnswerType.DIRECT, DirectColor, GlanceModifier.defaultWeight())
+        WidgetButton(AnswerType.DIRECT, stats.directAnswers, DirectColor, GlanceModifier.defaultWeight())
         Spacer(GlanceModifier.width(6.dp))
-        WidgetButton("Q", stats.questionAnswers, AnswerType.QUESTION, QuestionColor, GlanceModifier.defaultWeight())
+        WidgetButton(AnswerType.QUESTION, stats.questionAnswers, QuestionColor, GlanceModifier.defaultWeight())
         Spacer(GlanceModifier.width(6.dp))
-        WidgetButton("?", stats.unknownAnswers, AnswerType.UNKNOWN, UnknownColor, GlanceModifier.defaultWeight())
+        WidgetButton(AnswerType.UNKNOWN, stats.unknownAnswers, UnknownColor, GlanceModifier.defaultWeight())
     }
 }
 
@@ -224,23 +229,24 @@ class QCounterCompactWidget : GlanceAppWidget() {
         val repository = (context.applicationContext as QCounterApp).repository
         val stats = repository.stats.first()
         provideContent {
-            val prefs = currentState<Preferences>()
-            val action = prefs[CompactActionKey]
-                ?.let { runCatching { AnswerType.valueOf(it) }.getOrNull() }
-                ?: AnswerType.QUESTION
-            WidgetCompactContent(stats, action)
+            GlanceTheme {
+                val prefs = currentState<Preferences>()
+                val action = prefs[CompactActionKey]
+                    ?.let { runCatching { AnswerType.valueOf(it) }.getOrNull() }
+                    ?: AnswerType.QUESTION
+                WidgetCompactContent(stats, action)
+            }
         }
     }
 }
 
 @Composable
 private fun WidgetCompactContent(stats: InteractionStats, action: AnswerType) {
-    val tile = colorFor(action)
-    val content = ColorProvider(onTile(tile))
+    val content = ColorProvider(colorFor(action))
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(tile)
+            .background(GlanceTheme.colors.surfaceVariant)
             .cornerRadius(16.dp)
             .clickable(
                 actionRunCallback<RecordActionCallback>(
@@ -251,30 +257,41 @@ private fun WidgetCompactContent(stats: InteractionStats, action: AnswerType) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = "${countFor(stats, action)}",
-            style = TextStyle(color = content, fontWeight = FontWeight.Bold, fontSize = 26.sp),
+        Image(
+            provider = ImageProvider(iconResFor(action)),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(content),
+            modifier = GlanceModifier.size(24.dp),
         )
         Text(
-            text = shortFor(action),
-            style = TextStyle(color = content),
+            text = compactCount(countFor(stats, action)),
+            style = TextStyle(color = content, fontWeight = FontWeight.Bold, fontSize = 22.sp),
         )
     }
 }
 
-/** Variante 2×1 : total + boutons Directe et Question uniquement, pour une saisie compacte. */
+/** Variante 2×1 : total + 2 boutons, les types étant choisis à la configuration. */
 class QCounterButtonsWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val repository = (context.applicationContext as QCounterApp).repository
         val stats = repository.stats.first()
         provideContent {
-            GlanceTheme { WidgetButtonsContent(stats) }
+            GlanceTheme {
+                val prefs = currentState<Preferences>()
+                fun read(key: androidx.datastore.preferences.core.Preferences.Key<String>, default: AnswerType) =
+                    prefs[key]?.let { runCatching { AnswerType.valueOf(it) }.getOrNull() } ?: default
+                WidgetButtonsContent(
+                    stats = stats,
+                    first = read(ButtonsFirstKey, AnswerType.DIRECT),
+                    second = read(ButtonsSecondKey, AnswerType.QUESTION),
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun WidgetButtonsContent(stats: InteractionStats) {
+private fun WidgetButtonsContent(stats: InteractionStats, first: AnswerType, second: AnswerType) {
     Row(
         modifier = GlanceModifier
             .fillMaxSize()
@@ -284,7 +301,7 @@ private fun WidgetButtonsContent(stats: InteractionStats) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "${stats.totalInteractions}",
+            text = compactCount(stats.totalInteractions),
             style = TextStyle(
                 color = GlanceTheme.colors.onSurface,
                 fontWeight = FontWeight.Bold,
@@ -292,9 +309,9 @@ private fun WidgetButtonsContent(stats: InteractionStats) {
             ),
         )
         Spacer(GlanceModifier.width(8.dp))
-        WidgetButton("D", stats.directAnswers, AnswerType.DIRECT, DirectColor, GlanceModifier.defaultWeight())
+        WidgetButton(first, countFor(stats, first), colorFor(first), GlanceModifier.defaultWeight())
         Spacer(GlanceModifier.width(6.dp))
-        WidgetButton("Q", stats.questionAnswers, AnswerType.QUESTION, QuestionColor, GlanceModifier.defaultWeight())
+        WidgetButton(second, countFor(stats, second), colorFor(second), GlanceModifier.defaultWeight())
     }
 }
 

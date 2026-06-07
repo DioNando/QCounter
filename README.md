@@ -91,8 +91,12 @@ montre la proportion Oui vs Non. C'est une qualification, pas une catégorie sé
   (Classique, Expressif, Animaux, Météo) et 3 niveaux de **sensibilité** (Subtil / Normal / Marqué).
 
 **Historique & graphiques**
-- **Historique horodaté** persistant, **paginé** (100 entrées, bouton « Afficher plus »), avec **mode
-  sélection multiple** (appui long → suppression, confirmation et annulation).
+- **Historique horodaté** persistant avec **mode sélection multiple** (appui long → suppression,
+  confirmation et annulation).
+- **Regroupement par jour / semaine / mois** : en-têtes de section relatifs (« Aujourd'hui »,
+  « Cette semaine », « Juin 2026 »…), sélecteur en haut de l'écran.
+- **Filtres de catégories** : une puce par type présent (toucher pour **afficher / masquer** ce type).
+- **Nombre affiché réglable** : **50 / 100 / 250** entrées (le surplus est signalé sous la liste).
 - **Page Graphiques** : **records de séries par type** (plus longue série de chaque type), **heatmap**
   d'activité par heure × jour de la semaine, **activité par jour** et **activité par heure** (barres).
 - **Réinitialisation** complète depuis l'accueil ou l'historique.
@@ -115,15 +119,20 @@ montre la proportion Oui vs Non. C'est une qualification, pas une catégorie sé
 
 **Hors application**
 - **Widget d'écran d'accueil** en **4 variantes** : complet (titre + total + 3 boutons), compact sur une
-  ligne (total + 3 boutons), **2×1** (total + Directe & Question) et **1×1** (bouton Question). **Fond
-  Material You**, boutons aux **couleurs de marque**. La **1×1 est configurable** (action au choix).
+  ligne (total + 3 boutons), **2×1** (total + 2 actions) et **1×1** (action unique). **Fond Material You**,
+  tuiles au **style tonal de l'app** (surface neutre + **icône et compteur à la couleur d'accent**, mêmes
+  icônes que l'app).
+- **Variantes configurables** : la **1×1** (action enregistrée au choix) et la **2×1** (les **2 actions**
+  affichées au choix) ouvrent un écran de configuration à l'ajout — au **style de l'app** (logo + cartes).
+- **Aperçus dans le sélecteur de widgets** (`previewLayout`, Android 12+) pour chaque variante.
 - **Icônes de raccourcis distinctes** par action (bulle colorée : Directe / Question / Esquive).
 - **Raccourcis du lanceur** (appui long sur l'icône) pour enregistrer une action sans ouvrir l'app.
 - **Tuile Quick Settings** pour compter une « Question » depuis le volet des réglages rapides.
 
 **Données**
-- **Export / Import** en JSON, depuis la barre du haut de l'**Historique** (icônes ⬆ / ⬇). L'import
-  **fusionne** sans écraser ni créer de doublon (dédup sur `type + horodatage`).
+- **Export / Import** en JSON, depuis la barre du haut de l'**Historique** (icônes ⬆ / ⬇).
+  L'export propose **tout exporter** ou **exporter selon les filtres** de catégories actifs.
+  L'import **fusionne** sans écraser ni créer de doublon (dédup sur `type + horodatage`).
 
 Réglages persistés via **DataStore** ; accessibles depuis l'icône engrenage de l'accueil.
 
@@ -257,7 +266,8 @@ debrief de conversations** :
 
 ### 📊 Données & analyse
 - 🟠 **Sessions nommées** : démarrer/clore une session (ex. « Réunion du 6/6 »), comparer les sessions.
-- 🟠 **Filtres par période** dans l'historique (aujourd'hui / semaine / mois) + recherche.
+- 🟢 **Recherche** dans l'historique (le regroupement jour/semaine/mois et les filtres de catégories
+  sont déjà en place).
 - 🟠 **Évolution temporelle** du TEL/RC et de l'indice de clarté (courbe par jour).
 - 🟠 **Profils d'interlocuteurs** : suivre plusieurs personnes et comparer leurs comportements.
 - 🟢 **Note / contexte** par interaction (sujet, lieu, humeur).

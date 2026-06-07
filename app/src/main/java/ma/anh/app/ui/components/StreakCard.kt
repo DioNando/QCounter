@@ -120,7 +120,7 @@ private fun StreakStat(
                 color = Color.White.copy(alpha = 0.85f),
             )
             Text(
-                text = "×$count",
+                text = "×${compactCount(count)}",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,

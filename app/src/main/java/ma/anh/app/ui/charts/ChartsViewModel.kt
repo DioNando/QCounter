@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import ma.anh.app.data.model.AnswerType
 import ma.anh.app.data.model.HeatmapData
+import ma.anh.app.data.model.InteractionStats
 import ma.anh.app.data.model.StreakStats
 import ma.anh.app.data.repository.InteractionRepository
 
@@ -24,7 +25,15 @@ class ChartsViewModel(
             initialValue = HeatmapData(),
         )
 
-    /** Plus longue série par type, triée par ordre des types, pour la carte « Records ». */
+    /** Compteurs exacts par catégorie, pour la carte de détail. */
+    val stats: StateFlow<InteractionStats> = repository.stats
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = InteractionStats(),
+        )
+
+    /** Plus longue série par type (Oui/Non inclus séparément), pour la carte « Records ». */
     val records: StateFlow<List<Pair<AnswerType, Int>>> = repository.history
         .map { rows ->
             StreakStats.bestByType(rows.map { it.type })

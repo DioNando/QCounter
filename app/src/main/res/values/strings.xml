@@ -58,6 +58,10 @@
     <string name="settings_palette">Couleurs des indicateurs</string>
     <string name="settings_custom_category">4ᵉ catégorie</string>
     <string name="settings_custom_category_desc">Un bouton supplémentaire, neutre dans les indicateurs</string>
+    <string name="settings_compact_actions">Réduire les boutons d\'action</string>
+    <string name="settings_compact_actions_desc">N\'afficher que les icônes, via un bouton flottant</string>
+    <string name="cd_actions_expand">Afficher les actions</string>
+    <string name="cd_actions_collapse">Masquer les actions</string>
     <string name="settings_labels">Libellés des boutons</string>
     <string name="settings_labels_hint">Personnalisez le texte des 3 boutons. Laissez vide pour le libellé par défaut.</string>
     <string name="label_field_long">Libellé long</string>
@@ -106,9 +110,10 @@
     <!-- Widget, raccourcis et tuile Quick Settings -->
     <string name="widget_description">Compter une réponse sans ouvrir l\'app.</string>
     <string name="widget_description_row">Anh compact, sur une seule ligne.</string>
-    <string name="widget_description_buttons">Anh 2×1 : total + Directe et Question.</string>
+    <string name="widget_description_buttons">Anh 2×1 : total + 2 actions au choix.</string>
     <string name="widget_description_compact">Anh 1×1 : compter une action d\'un tap (configurable).</string>
     <string name="widget_config_title">Quelle action enregistrer ?</string>
+    <string name="widget_config_title_two">Quelles 2 actions afficher ?</string>
     <string name="shortcut_recorded">Ajouté : %1$s</string>
     <string name="tile_qs_label">Anh · Question</string>
     <string name="tile_qs_subtitle">%1$d interactions</string>
@@ -120,6 +125,7 @@
     <string name="heatmap_title">Activité par heure et par jour</string>
     <string name="heatmap_subtitle">Plus une case est foncée, plus vous avez enregistré d\'interactions sur ce créneau.</string>
     <string name="records_title">Records de séries</string>
+    <string name="category_totals_title">Détail par catégorie</string>
     <string name="weekday_chart_title">Activité par jour de la semaine</string>
     <string name="hourly_chart_title">Activité par heure</string>
     <string-array name="weekday_initials">
@@ -148,6 +154,22 @@
     <string name="history_title">Historique des interactions</string>
     <string name="history_empty">Aucune interaction enregistrée pour l\'instant.</string>
     <string name="history_show_more">Afficher plus (%1$d restants)</string>
+    <string name="history_filter_empty">Aucune interaction pour ces filtres.</string>
+    <string name="history_page_size">Afficher</string>
+    <string name="history_more_hidden">%1$d de plus non affichée(s)</string>
+    <string name="export_all">Tout exporter</string>
+    <string name="export_filtered">Exporter les filtres actuels</string>
+
+    <!-- Regroupement de l\'historique -->
+    <string name="history_group_day">Jour</string>
+    <string name="history_group_week">Semaine</string>
+    <string name="history_group_month">Mois</string>
+    <string name="history_group_today">Aujourd\'hui</string>
+    <string name="history_group_yesterday">Hier</string>
+    <string name="history_group_this_week">Cette semaine</string>
+    <string name="history_group_last_week">Semaine dernière</string>
+    <string name="history_group_this_month">Ce mois-ci</string>
+    <string name="history_group_week_of">Semaine du %1$s</string>
     <string name="action_reset">Réinitialiser</string>
     <string name="reset_dialog_title">Réinitialiser les compteurs ?</string>
     <string name="reset_dialog_message">Toutes les interactions enregistrées seront définitivement supprimées.</string>

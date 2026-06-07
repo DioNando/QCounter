@@ -80,6 +80,16 @@
             </intent-filter>
         </activity>
 
+        <!-- Écran de configuration du widget 2×1 (choix des 2 actions affichées). -->
+        <activity
+            android:name=".ui.widget.ButtonsWidgetConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.QCounter">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Widget — variante 1×1. -->
         <receiver
             android:name=".ui.widget.QCounterCompactWidgetReceiver"
