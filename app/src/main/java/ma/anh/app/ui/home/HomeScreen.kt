@@ -177,14 +177,21 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    // Le logo contient déjà le titre « Anh » (titre adaptatif clair/sombre).
-                    Image(
-                        painter = painterResource(R.drawable.ic_homepage),
-                        contentDescription = stringResource(R.string.logo_content_desc),
-                        modifier = Modifier
-                            .height(32.dp)
-                            .width(73.dp),
-                    )
+                    // Icône de l'app + nom « Anh » en couleur primary.
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_logo_mark),
+                            contentDescription = stringResource(R.string.logo_content_desc),
+                            modifier = Modifier.size(32.dp),
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 },
                 actions = {
                     IconButton(onClick = { onSetDiscreet(true) }) {
@@ -779,25 +786,44 @@ private fun MiniActionFab(
     }
     // Icône contrastée selon la luminosité du fond (encre sur jaune clair, blanc sur couleurs foncées).
     val onAccent = if (accent.luminance() > 0.5f) Color(0xFF1D1D1B) else Color.White
-    FloatingActionButton(
-        onClick = onClick,
-        containerColor = accent,
-        contentColor = onAccent,
-        // Pas d'ombre sur les boutons d'action (réservée au bouton flottant principal).
-        elevation = FloatingActionButtonDefaults.elevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 0.dp,
-            focusedElevation = 0.dp,
-            hoveredElevation = 0.dp,
-        ),
+    Row(
         modifier = Modifier.scale(scale.value),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = onAccent,
-            modifier = Modifier.size(30.dp),
-        )
+        // Libellé de l'action, à gauche du bouton (pastille tonale — pattern charte).
+        Surface(
+            shape = RoundedCornerShape(10.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            shadowElevation = 2.dp,
+        ) {
+            Text(
+                text = contentDescription,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            )
+        }
+        FloatingActionButton(
+            onClick = onClick,
+            containerColor = accent,
+            contentColor = onAccent,
+            // Pas d'ombre sur les boutons d'action (réservée au bouton flottant principal).
+            elevation = FloatingActionButtonDefaults.elevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 0.dp,
+                focusedElevation = 0.dp,
+                hoveredElevation = 0.dp,
+            ),
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = onAccent,
+                modifier = Modifier.size(30.dp),
+            )
+        }
     }
 }
 
