@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ma.anh.app.R
 
@@ -88,15 +89,16 @@ fun AnhBrandMark(
                 },
         )
         Spacer(Modifier.height(20.dp))
-        Image(
-            painter = painterResource(R.drawable.anh_verrouillage),
-            contentDescription = stringResource(R.string.app_name),
-            modifier = Modifier
-                .size(width = 120.dp, height = 62.dp)
-                .graphicsLayer {
-                    alpha = enterText
-                    translationY = (1f - enterText) * 18f
-                },
+        // Nom de l'app en texte, même couleur que sur l'accueil (primary).
+        Text(
+            text = stringResource(R.string.app_name),
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.graphicsLayer {
+                alpha = enterText
+                translationY = (1f - enterText) * 18f
+            },
         )
         if (showHint) {
             Spacer(Modifier.height(8.dp))
