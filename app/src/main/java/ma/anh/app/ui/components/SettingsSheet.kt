@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,10 +20,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.DonutLarge
@@ -74,6 +75,7 @@ fun SettingsSheet(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding()
+                .imePadding()
                 .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -357,12 +359,14 @@ private fun LabelField(
     onCommit: (String) -> Unit,
 ) {
     var text by rememberSaveable { mutableStateOf(initial ?: "") }
-    OutlinedTextField(
+    TextField(
         value = text,
         onValueChange = { text = it; onCommit(it) },
         label = { Text(label) },
         placeholder = { Text(placeholder) },
         singleLine = true,
+        shape = QCounterFieldShape,
+        colors = qcounterFieldColors(),
         modifier = Modifier.fillMaxWidth(),
     )
 }

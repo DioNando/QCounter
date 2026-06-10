@@ -21,8 +21,8 @@ en touche ») sans pouvoir l'objectiver. Anh transforme cette impression en **do
 - **Quantifier** une tendance plutôt que la deviner — combien de fois, dans quelles proportions.
 - **Repérer des schémas** : pics d'esquive, créneaux horaires, évolution dans le temps.
 - **Débriefer** après coup grâce à un historique horodaté et des graphiques.
-- **Saisie discrète et rapide** : panneau au pouce, widget d'écran d'accueil, raccourcis, tuile
-  Quick Settings et annulation par secousse — pour compter sans casser le fil de la conversation.
+- **Saisie discrète et rapide** : panneau au pouce, widget d'écran d'accueil, raccourcis et tuile
+  Quick Settings — pour compter sans casser le fil de la conversation.
 
 C'est un outil d'**observation personnelle**, pas un jugement : les libellés et l'interprétation
 restent à la main de l'utilisateur.
@@ -103,7 +103,7 @@ montre la proportion Oui vs Non. C'est une qualification, pas une catégorie sé
 
 **Annulation & confidentialité**
 - **Annulation** par **bouton flottant éphémère** (apparaît après chaque saisie, disparaît au bout de
-  quelques secondes) **et par secousse** (shake-to-undo, avec retour haptique).
+  quelques secondes, avec retour haptique).
 - **Mode discret** : un appui sur l'icône « œil » masque instantanément tout le contenu derrière un
   écran neutre. Tant qu'il est actif, **`FLAG_SECURE`** est posé (contenu masqué dans l'aperçu des
   apps récentes et captures d'écran bloquées), et le réaffichage exige un **déverrouillage
@@ -125,7 +125,8 @@ montre la proportion Oui vs Non. C'est une qualification, pas une catégorie sé
 - **Variantes configurables** : la **1×1** (action enregistrée au choix) et la **2×1** (les **2 actions**
   affichées au choix) ouvrent un écran de configuration à l'ajout — au **style de l'app** (logo + cartes).
 - **Aperçus dans le sélecteur de widgets** (`previewLayout`, Android 12+) pour chaque variante.
-- **Icônes de raccourcis distinctes** par action (bulle colorée : Directe / Question / Esquive).
+- **Icônes de raccourcis distinctes** par action (glyphe Material plein, monochrome jaune marque
+  `#F2B705`, fond transparent : check / chat / aide).
 - **Raccourcis du lanceur** (appui long sur l'icône) pour enregistrer une action sans ouvrir l'app.
 - **Tuile Quick Settings** pour compter une « Question » depuis le volet des réglages rapides.
 
@@ -189,7 +190,7 @@ app/src/main/java/ma/anh/app/
     ├── ViewModelFactory.kt
     ├── navigation/           # QCounterNavHost (transitions animées)
     ├── theme/                # Color, Theme (Material You), Type, AccentPalette
-    ├── util/                 # ShakeDetector (accéléromètre), SecureReveal (FLAG_SECURE + biométrie)
+    ├── util/                 # SecureReveal (FLAG_SECURE + biométrie)
     ├── components/           # ActionCard, AnimatedCount, AnswerTypeVisuals (+ libellés),
     │                         #   WaffleChart · DonutChart · ActivityRings · Heatmap ·
     │                         #   ActivityBarChart · ClarityScoreCard · StreakCard,
@@ -227,7 +228,7 @@ est réservée aux éléments à mettre en focus (barre de saisie ancrée, bouto
 **Option A — Android Studio (recommandé)**
 1. *File → Open* → sélectionner le dossier `QCounter`.
 2. Laisser Android Studio télécharger Gradle, le **SDK Android 36** et générer le wrapper.
-3. *Run ▶* sur un émulateur ou un appareil (API 24+). Pour tester Material You et la secousse,
+3. *Run ▶* sur un émulateur ou un appareil (API 24+). Pour tester Material You,
    privilégier un **appareil physique Android 12+**.
 
 **Option B — ligne de commande** (Gradle installé globalement)
@@ -294,7 +295,6 @@ debrief de conversations** :
 - 🟠 **4ᵉ catégorie** personnalisée.
 - 🟠 **Couleurs personnalisées** (color picker) en plus des presets.
 - 🟢 **Forcer le thème** clair/sombre (override système).
-- 🟢 **Icônes de raccourcis sur‑mesure** (glyphes ✓ / ↩ / ? au lieu de la bulle colorée).
 
 ### ☁️ Persistance & synchro
 - 🟢 **Partage** d'un récapitulatif (image / CSV) en plus de l'export JSON.
@@ -318,6 +318,6 @@ debrief de conversations** :
 - 🟢 **CI** (GitHub Actions) : build + tests + lint à chaque push.
 - 🟢 **ktlint / Detekt** pour la cohérence du style.
 - 🟠 **Accessibilité** : audit TalkBack, contrastes AA, tailles de police dynamiques.
-- 🟠 **Internationalisation** : anglais, **arabe (RTL)** — l'app est déjà en `supportsRtl`.
+- 🟠 **Internationalisation** : ✅ **anglais** ajouté (`values-en/`, parité des clés vérifiée) — reste l'**arabe (RTL)** (l'app est déjà en `supportsRtl`).
 - 🟠 **Hilt** pour l'injection si l'app grossit (remplace le conteneur manuel).
 - 🟢 **Migrations Room** versionnées + **Baseline Profiles** (perfs de démarrage).

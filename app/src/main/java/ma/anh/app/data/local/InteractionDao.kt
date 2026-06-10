@@ -39,7 +39,7 @@ interface InteractionDao {
     @Query("SELECT * FROM interactions ORDER BY timestamp ASC")
     suspend fun getAll(): List<InteractionEntity>
 
-    /** Dernière interaction enregistrée (pour l'annulation par secousse / bouton flottant). */
+    /** Dernière interaction enregistrée (pour l'annulation via le bouton flottant). */
     @Query("SELECT * FROM interactions ORDER BY timestamp DESC, id DESC LIMIT 1")
     suspend fun lastInteraction(): InteractionEntity?
 

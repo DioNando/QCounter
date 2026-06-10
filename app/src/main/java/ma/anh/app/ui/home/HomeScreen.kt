@@ -106,7 +106,6 @@ import ma.anh.app.ui.components.clarityEmoji
 import ma.anh.app.ui.components.emojiSetOf
 import ma.anh.app.ui.components.yesNoEmoji
 import ma.anh.app.ui.components.moodEmoji
-import ma.anh.app.ui.util.ShakeToAction
 import ma.anh.app.ui.util.SecureFlagEffect
 import ma.anh.app.ui.util.rememberBiometricReveal
 import kotlinx.coroutines.delay
@@ -138,8 +137,8 @@ fun HomeScreen(
 
     val haptics = LocalHapticFeedback.current
 
-    // Annulation éphémère : un bouton flottant apparaît après chaque saisie puis disparaît,
-    // et une secousse de l'appareil annule la dernière interaction (remplace le snackbar).
+    // Annulation éphémère : un bouton flottant apparaît après chaque saisie puis disparaît
+    // (remplace le snackbar).
     var undoVisible by remember { mutableStateOf(false) }
     var eventToken by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) {
@@ -158,9 +157,6 @@ fun HomeScreen(
         undoVisible = false
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
     }
-
-    // Secousse → annuler la dernière interaction (inactif en mode discret).
-    ShakeToAction(enabled = !discreet) { undoLast() }
 
     // Mode discret : FLAG_SECURE (anti-capture / aperçu multitâche masqué) tant qu'il est actif…
     SecureFlagEffect(active = discreet)

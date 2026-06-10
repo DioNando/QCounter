@@ -54,7 +54,7 @@ class HomeViewModel(
         viewModelScope.launch { repository.deleteById(id) }
     }
 
-    /** Annule la dernière interaction (bouton flottant / secousse). */
+    /** Annule la dernière interaction (bouton flottant). */
     fun undoLast() {
         viewModelScope.launch { repository.deleteLast() }
     }
